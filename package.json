@@ -24,9 +24,11 @@
     "@ark-ui/react": "^5.6.0",
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
+    "@tailwindcss/vite": "^4.1.4",
     "@tanstack/react-router": "^1.117.0",
     "@tanstack/react-router-devtools": "^1.117.0",
-    "electron-updater": "^6.3.9"
+    "electron-updater": "^6.3.9",
+    "tailwindcss": "^4.1.4"
   },
   "devDependencies": {
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
