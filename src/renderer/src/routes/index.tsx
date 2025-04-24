@@ -1,5 +1,5 @@
-import { Button } from "@/components/tailwind/button";
-import { Input } from "@/components/tailwind/input";
+import { Button } from "@/components/shadcn/button";
+import { Input } from "@/components/shadcn/input";
 import { createFileRoute } from "@tanstack/react-router";
 import { JSX } from "react";
 
