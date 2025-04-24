@@ -1,6 +1,6 @@
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-import "@/assets/styles/tailwind.css"
+import "@/assets/styles/tailwind.css";
 
 export const Route = createRootRoute({
    component: () => (
@@ -8,7 +8,7 @@ export const Route = createRootRoute({
          <div className="p-2 flex gap-2 bg-red-500">
             <Link to="/" className="[&.active]:font-bold">
                Home
-            </Link>{" "}
+            </Link>
          </div>
          <hr />
          <Outlet />
