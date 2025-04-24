@@ -23,6 +23,10 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
+    "@radix-ui/react-context-menu": "^2.2.12",
+    "@radix-ui/react-dialog": "^1.1.11",
+    "@radix-ui/react-popover": "^1.1.11",
+    "@radix-ui/react-select": "^2.2.2",
     "@radix-ui/react-slot": "^1.2.0",
     "@tailwindcss/vite": "^4.1.4",
     "@tanstack/react-router": "^1.117.0",
