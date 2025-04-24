@@ -1,4 +1,5 @@
 import { Button } from "@/components/tailwind/button";
+import { Input } from "@/components/tailwind/input";
 import { createFileRoute } from "@tanstack/react-router";
 import { JSX } from "react";
 
@@ -13,6 +14,7 @@ function Index(): JSX.Element {
          <Button>
             fuck
          </Button>
+         <Input type="email" placeholder="Email" className="focus-visible:ring-0 focus-visible:outline-none"/>
       </div>
    );
 }
