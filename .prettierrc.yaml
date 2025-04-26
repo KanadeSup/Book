@@ -4,4 +4,4 @@ printWidth: 80
 trailingComma: all
 tabWidth: 3
 bracketSpacing: true
-
+bracketSameLine: true

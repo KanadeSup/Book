@@ -3,7 +3,7 @@ import { cn } from "@/utils/tailwindUtils";
 type IconButtonProps = {
    children: React.ReactNode;
    className?: string;
-   onClick: () => void;
+   onClick?: () => void;
 };
 
 export function IconButton(props: IconButtonProps) {
