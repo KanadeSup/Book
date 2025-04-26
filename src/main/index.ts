@@ -17,9 +17,6 @@ function createWindow(): void {
       },
    });
 
-   // Remove menu bar to prevent it from appearing when Alt key is pressed
-   mainWindow.removeMenu();
-
    mainWindow.on("ready-to-show", () => {
       mainWindow.show();
    });
