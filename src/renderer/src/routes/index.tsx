@@ -1,4 +1,4 @@
-import { DefaultLayout } from "@/layouts/DefaultLayout";
+import { DefaultLayout, Title } from "@/layouts/DefaultLayout";
 import { createFileRoute } from "@tanstack/react-router";
 import { JSX } from "react";
 
@@ -9,7 +9,9 @@ export const Route = createFileRoute("/")({
 function Index(): JSX.Element {
    return (
       <DefaultLayout>
-         abc
+         <Title>
+            <h1 className="font-semibold text-lg"> Books </h1>
+         </Title>
       </DefaultLayout>
    );
 }

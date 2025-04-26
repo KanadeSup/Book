@@ -131,4 +131,7 @@
    .flex-container > * {
       @apply shrink-0;
    }
+   .center {
+      @apply flex items-center justify-center;
+   }
 }
