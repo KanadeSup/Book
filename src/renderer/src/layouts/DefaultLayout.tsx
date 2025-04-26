@@ -6,7 +6,7 @@ type DefaultLayoutProps = {
 }
 export function DefaultLayout({ children }: DefaultLayoutProps): JSX.Element {
    return (
-      <div className="p-2 flex-container">
+      <div className="flex-container">
          <DefaultSidebar />
          {children}
       </div>

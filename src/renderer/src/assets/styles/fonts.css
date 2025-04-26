@@ -1,0 +1,13 @@
+@font-face {
+   font-family: 'geist';
+   src: url('@/assets/fonts/Geist-VariableFont_wght.ttf') format('truetype');
+   font-weight: normal;
+   font-style: normal;
+}
+
+@font-face {
+   font-family: 'henny';
+   src: url('@/assets/fonts/henny.ttf') format('truetype');
+   font-weight: normal;
+   font-style: normal;
+}

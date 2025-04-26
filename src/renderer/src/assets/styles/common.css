@@ -1,0 +1,7 @@
+body {
+   font-family: 'geist', 'henny';
+}
+
+.pop-over-content-trigger-width {
+	width: var(--radix-popover-trigger-width);
+}
