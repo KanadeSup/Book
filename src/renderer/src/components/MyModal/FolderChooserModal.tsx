@@ -1,4 +1,4 @@
-import { JSX, useState } from "react";
+import { JSX, useEffect, useState } from "react";
 import {
    Dialog,
    DialogContent,
@@ -12,8 +12,9 @@ import { MyButton } from "../MyButton/MyButton";
 import { openFileOrDirDialog } from "@/services/dialog";
 export type FolderChooserModalProps = {
    children?: React.ReactNode;
-   onSubmit?: () => void;
+   onSubmit?: (filePath: string) => void;
    open: boolean;
+   onClose: () => void;
    defaultFilePath?: string | null;
 };
 export function FolderChooserModal(
@@ -22,9 +23,14 @@ export function FolderChooserModal(
    const [filePath, setFilePath] = useState(props.defaultFilePath ?? "");
    const handleChooseDir = async () => {
       const res = await openFileOrDirDialog("dir");
-      if(res.canceled) return;
-      setFilePath(res.filePaths[0]);
-   }
+      if (res.canceled) return;
+      const choosedDirPath = res.filePaths[0];
+      setFilePath(choosedDirPath);
+   };
+   useEffect(() => {
+      if (props.open == false) return;
+      setFilePath(props.defaultFilePath ?? "");
+   }, [props.open, props.defaultFilePath]);
    return (
       <Dialog open={props.open}>
          <DialogTrigger></DialogTrigger>
@@ -50,12 +56,20 @@ export function FolderChooserModal(
                </IconButton>
             </div>
             <div className="flex items-center gap-2 justify-end mt-4">
-               <MyButton variant="destructive" className="font-semibold">
+               <MyButton
+                  variant="destructive"
+                  className="font-semibold"
+                  onClick={() => props.onClose()}>
                   Cancel
                </MyButton>
                <MyButton
                   variant="default"
-                  className="font-semibold bg-gray-300 text-gray-800 hover:bg-gray-300/80">
+                  className="font-semibold bg-gray-300 text-gray-800 hover:bg-gray-300/80"
+                  onClick={() => {
+                     props.onClose();
+                     if (!props.onSubmit) return;
+                     props.onSubmit(filePath);
+                  }}>
                   Change
                </MyButton>
             </div>

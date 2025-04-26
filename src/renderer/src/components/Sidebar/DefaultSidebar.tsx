@@ -6,8 +6,9 @@ import {
 } from "@radix-ui/react-popover";
 import { Link, useLocation } from "@tanstack/react-router";
 import { ArrowLeftRight, Book, ChevronDown, Settings } from "lucide-react";
-import { JSX } from "react";
+import { JSX, useState } from "react";
 import { FolderChooserModal } from "../MyModal/FolderChooserModal";
+import { useConfigStore } from "@/stores/configStore";
 
 export function DefaultSidebar(): JSX.Element {
    return (
@@ -28,9 +29,13 @@ function Header(): JSX.Element {
       {
          name: "Change storage location",
          icon: ArrowLeftRight,
-         action: () => {},
+         action: () => {
+            setIsFolderChooserOpen(true);
+         },
       },
    ];
+   const [isFolderChooserOpen, setIsFolderChooserOpen] = useState(false);
+   const {config, setConfig} = useConfigStore();
    return (
       <div>
          <Popover>
@@ -43,14 +48,21 @@ function Header(): JSX.Element {
                   <div
                      key={item.name}
                      className="hover:bg-accent px-3 py-2 cursor-pointer flex items-center gap-2 font-semibold"
-                  >
+                     onClick={() => item.action()}>
                      <item.icon className="w-4 h-4" />
                      {item.name}
                   </div>
                ))}
             </PopoverContent>
          </Popover>
-         <FolderChooserModal open={true} />
+         <FolderChooserModal
+            open={isFolderChooserOpen}
+            onClose={() => setIsFolderChooserOpen(false)}
+            defaultFilePath={config.spacePath}
+            onSubmit={(filePath) => {
+               setConfig({...config, spacePath: filePath})
+            }}
+         />
       </div>
    );
 }
@@ -73,8 +85,7 @@ function NavList(): JSX.Element {
                className={cn(
                   "hover:bg-zinc-800 px-3 py-2 cursor-pointer flex items-center gap-2 font-semibold",
                   location.pathname == item.to ? "bg-zinc-800" : "",
-               )}
-            >
+               )}>
                <item.icon className="w-4 h-4" />
                {item.name}
             </Link>
