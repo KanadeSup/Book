@@ -23,11 +23,16 @@ export const Route = createFileRoute("/")({
       }
       const res = await getBooks(stateData.state.config.spacePath);
       if (res.success) {
-         console.log(res.data);
          return res.data;
       }
-      if (res.errorCode == "invalid-path") throw new SpacePathInvalidError("");
-      throw new UnexceptionError("Something went wrong");
+      console.error("routes/index.tsx - createFileRoute(): ", res.errorMessage);
+      throw new SpacePathInvalidError("");
+   },
+   onError: (error) => {
+      if (error instanceof SpacePathInvalidError) {
+         throw redirect({ to: "/setup" });
+      }
+      throw error;
    },
 });
 
