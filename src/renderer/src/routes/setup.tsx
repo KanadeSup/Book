@@ -46,7 +46,6 @@ function SetupPage(): JSX.Element {
             <div className="flex items-center gap-2 mt-4">
                <MyInput
                   readOnly
-                  className="focus-visible:border-input"
                   value={filePath}
                />
                <IconButton

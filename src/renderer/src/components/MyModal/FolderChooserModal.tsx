@@ -60,7 +60,6 @@ export function FolderChooserModal(
             <div className="flex items-center gap-2">
                <MyInput
                   readOnly
-                  className="focus-visible:border-input"
                   value={filePath}
                />
                <IconButton
