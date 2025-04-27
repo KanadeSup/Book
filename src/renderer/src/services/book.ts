@@ -1,14 +1,19 @@
-import { BaseResponse } from "@/types/reponse.types";
-import { readDir } from "./fileSystem";
+import { CommandResponse } from "@/types/reponse.types";
+import { readDir, ReadDirRes } from "./fileSystem";
 import { Book } from "@/types/book.types";
 
-export type GetBookReponse = BaseResponse<Book[]>;
+export type GetBookReponse = CommandResponse<Book[]> & {
+   errorCode?: "invalid-path";
+};
 export async function getBooks(directoryPath: string): Promise<GetBookReponse> {
-   const result = await readDir(directoryPath);
-   if (!result.success || !result.data) {
+   const result: ReadDirRes = await readDir(directoryPath);
+   if (!result.success) {
+      const errorCode =
+         result.errorCode === "not-found" ? "invalid-path" : undefined;
       return {
          success: false,
          errorMessage: result.errorMessage,
+         errorCode: errorCode,
          data: null,
       };
    }
@@ -23,7 +28,6 @@ export async function getBooks(directoryPath: string): Promise<GetBookReponse> {
    }
    return {
       success: true,
-      errorMessage: null,
       data: returnResult,
    };
 }

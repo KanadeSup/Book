@@ -1,7 +1,7 @@
-import { ipcMain } from "electron";
 import fs from "fs";
 import path from "path";
 import { CommandResponse } from "@/types/response.types";
+import { createCommand } from "./base";
 
 type Entry = {
    inode: number;
@@ -11,36 +11,39 @@ type Entry = {
    parentPath: string;
 };
 
-ipcMain.handle(
+createCommand(
    "command:readDir",
    async (_, dirPath: string): Promise<CommandResponse<Entry[]>> => {
-      try {
-         const entries = fs.readdirSync(dirPath, { withFileTypes: true });
-         const returnEntries: Entry[] = [];
-         for (const entry of entries) {
-            const absolutePath = path.join(entry.parentPath, entry.name);
-            const stat = fs.statSync(absolutePath);
-            returnEntries.push({
-               inode: stat.ino,
-               type: entry.isDirectory() ? "directory" : "file",
-               name: entry.name,
-               absolutePath: absolutePath,
-               parentPath: entry.parentPath,
-            });
-         }
-         return {
-            success: true,
-            errorMessage: null,
-            data: returnEntries,
-         };
-      } catch (e) {
-         console.error("[command:readDir]: Some thing went wrong");
-         console.trace();
+      if (!fs.existsSync(dirPath) || !isDir(dirPath)) {
          return {
             success: false,
-            errorMessage: "Some thing went wrong",
+            errorMessage: "Directory is not found",
+            errorCode: "not-found",
             data: null,
          };
       }
+      const entries = fs.readdirSync(dirPath, { withFileTypes: true });
+      const returnEntries: Entry[] = [];
+      for (const entry of entries) {
+         const absolutePath = path.join(entry.parentPath, entry.name);
+         const stat = fs.statSync(absolutePath);
+         returnEntries.push({
+            inode: stat.ino,
+            type: entry.isDirectory() ? "directory" : "file",
+            name: entry.name,
+            absolutePath: absolutePath,
+            parentPath: entry.parentPath,
+         });
+      }
+      return {
+         success: true,
+         data: returnEntries,
+      };
    },
 );
+
+function isDir(path: string) {
+   console.log("called")
+   const stat = fs.statSync(path);
+   return stat.isDirectory();
+}

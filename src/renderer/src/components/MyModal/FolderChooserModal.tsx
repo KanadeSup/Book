@@ -5,11 +5,12 @@ import {
    DialogTitle,
    DialogTrigger,
 } from "../shadcn/dialog";
-import { ArrowLeftRight, Folder } from "lucide-react";
+import { ArrowLeftRight, Folder, OctagonX } from "lucide-react";
 import { MyInput } from "../MyInput/MyInput";
 import { IconButton } from "../MyButton/IconButton";
 import { MyButton } from "../MyButton/MyButton";
 import { openFileOrDirDialog } from "@/services/dialog";
+import { toast } from "sonner";
 export type FolderChooserModalProps = {
    children?: React.ReactNode;
    onSubmit?: (filePath: string) => void;
@@ -23,9 +24,19 @@ export function FolderChooserModal(
    const [filePath, setFilePath] = useState(props.defaultFilePath ?? "");
    const handleChooseDir = async () => {
       const res = await openFileOrDirDialog("dir");
-      if (res.canceled) return;
-      const choosedDirPath = res.filePaths[0];
-      setFilePath(choosedDirPath);
+      if (res.success) {
+         const dialogResult = res.data;
+         if (dialogResult.canceled) return;
+         const choosedDirPath = dialogResult.filePaths[0];
+         setFilePath(choosedDirPath);
+         return;
+      }
+      toast(
+         <p className="text-red-400 font-semibold flex items-center gap-2">
+            <OctagonX className="w-7 h-7 stroke-red-400"/>
+            Something went wrong while using the file/directory dialog
+         </p>,
+      );
    };
    useEffect(() => {
       if (props.open == false) return;

@@ -5,6 +5,7 @@ import "@/assets/styles/tailwind.css";
 import "@/assets/styles/common.css";
 import { useEffect } from "react";
 import { useConfigStore } from "@/stores/configStore";
+import { Toaster } from "@/components/shadcn/sonner";
 
 export const Route = createRootRoute({
    component: Root,
@@ -21,6 +22,7 @@ function Root() {
       <>
          <Outlet />
          <TanStackRouterDevtools />
+         <Toaster />
       </>
    );
 }
