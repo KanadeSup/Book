@@ -7,6 +7,11 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
    main: {
       plugins: [externalizeDepsPlugin()],
+      resolve: {
+         alias: {
+            "@": resolve("src/main"),
+         },
+      },
    },
    preload: {
       plugins: [externalizeDepsPlugin()],
