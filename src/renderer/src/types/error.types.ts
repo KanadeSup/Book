@@ -1,1 +1,1 @@
-export type ErrorCode = "space-path-not-found"
+export type ErrorCode = "space-path-invalid" | "unexception"

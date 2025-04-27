@@ -4,12 +4,12 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 export type configState = {
    spacePath?: string | null;
 };
-type configStore = {
+export type ConfigStore = {
    config: configState;
    setConfig: (config: configState) => void;
 };
 
-export const useConfigStore = create<configStore>()(
+export const useConfigStore = create<ConfigStore>()(
    persist(
       (set) => ({
          config: {

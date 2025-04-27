@@ -4,8 +4,9 @@ import { MyInput } from "@/components/MyInput/MyInput";
 import { openFileOrDirDialog } from "@/services/dialog";
 import { useConfigStore } from "@/stores/configStore";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Folder } from "lucide-react";
+import { Folder, OctagonX } from "lucide-react";
 import { JSX, useState } from "react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/setup")({
    component: SetupPage,
@@ -17,9 +18,20 @@ function SetupPage(): JSX.Element {
    const { config, setConfig } = useConfigStore();
    const handleChooseDir = async () => {
       const res = await openFileOrDirDialog("dir");
-      if (res.canceled) return;
-      const choosedDirPath = res.filePaths[0];
-      setFilePath(choosedDirPath);
+      if (res.success) {
+         const dialogResult = res.data;
+         if (dialogResult.canceled) return;
+         const choosedDirPath = dialogResult.filePaths[0];
+         setFilePath(choosedDirPath);
+         setFilePath(choosedDirPath);
+         return;
+      }
+      toast(
+         <p className="text-red-400 font-semibold flex items-center gap-2">
+            <OctagonX className="w-7 h-7 stroke-red-400" />
+            Something went wrong while using the file/directory dialog
+         </p>,
+      );
    };
    return (
       <div className="center h-screen w-screen flex">
