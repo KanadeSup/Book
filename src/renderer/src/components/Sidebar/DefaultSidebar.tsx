@@ -35,7 +35,7 @@ function Header(): JSX.Element {
       },
    ];
    const [isFolderChooserOpen, setIsFolderChooserOpen] = useState(false);
-   const {config, setConfig} = useConfigStore();
+   const { config, setConfig } = useConfigStore();
    return (
       <div>
          <Popover>
@@ -48,7 +48,8 @@ function Header(): JSX.Element {
                   <div
                      key={item.name}
                      className="hover:bg-accent px-3 py-2 cursor-pointer flex items-center gap-2 font-semibold"
-                     onClick={() => item.action()}>
+                     onClick={() => item.action()}
+                  >
                      <item.icon className="w-4 h-4" />
                      {item.name}
                   </div>
@@ -60,7 +61,7 @@ function Header(): JSX.Element {
             onClose={() => setIsFolderChooserOpen(false)}
             defaultFilePath={config.spacePath}
             onSubmit={(filePath) => {
-               setConfig({...config, spacePath: filePath})
+               setConfig({ ...config, spacePath: filePath });
             }}
          />
       </div>
@@ -77,15 +78,16 @@ const navItems = [
 function NavList(): JSX.Element {
    const location = useLocation();
    return (
-      <div className="">
+      <div className="px-2">
          {navItems.map((item) => (
             <Link
                to={item.to}
                key={item.name}
                className={cn(
-                  "hover:bg-zinc-800 px-3 py-2 cursor-pointer flex items-center gap-2 font-semibold",
-                  location.pathname == item.to ? "bg-zinc-800" : "",
-               )}>
+                  "hover:bg-zinc-700 px-3 py-[5px] cursor-pointer flex items-center gap-2 font-semibold rounded-md",
+                  location.pathname == item.to ? "bg-zinc-700" : "",
+               )}
+            >
                <item.icon className="w-4 h-4" />
                {item.name}
             </Link>
