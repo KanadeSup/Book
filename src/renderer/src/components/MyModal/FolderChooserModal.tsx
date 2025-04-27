@@ -32,7 +32,10 @@ export function FolderChooserModal(
       setFilePath(props.defaultFilePath ?? "");
    }, [props.open, props.defaultFilePath]);
    return (
-      <Dialog open={props.open}>
+      <Dialog
+         open={props.open}
+         onOpenChange={(state) => state == false && props.onClose()}
+      >
          <DialogTrigger></DialogTrigger>
          <DialogContent className="text-gray-300" aria-describedby={undefined}>
             <DialogTitle className="hidden" />
@@ -51,7 +54,8 @@ export function FolderChooserModal(
                />
                <IconButton
                   className="w-9 h-9 shrink-0 bg-accent/40 hover:bg-accent/80 rounded-sm"
-                  onClick={handleChooseDir}>
+                  onClick={handleChooseDir}
+               >
                   <Folder className="w-4 h-4" />
                </IconButton>
             </div>
@@ -59,7 +63,9 @@ export function FolderChooserModal(
                <MyButton
                   variant="destructive"
                   className="font-semibold"
-                  onClick={() => props.onClose()}>
+                  onClick={() => props.onClose()}
+                  autoFocus
+               >
                   Cancel
                </MyButton>
                <MyButton
@@ -69,7 +75,8 @@ export function FolderChooserModal(
                      props.onClose();
                      if (!props.onSubmit) return;
                      props.onSubmit(filePath);
-                  }}>
+                  }}
+               >
                   Change
                </MyButton>
             </div>
