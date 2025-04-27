@@ -26,6 +26,8 @@ export default tseslint.config(
          ...eslintPluginReactRefresh.configs.vite.rules,
          "@typescript-eslint/explicit-function-return-type": "off",
          "react-refresh/only-export-components": "off",
+         "no-unused-vars": "warn", 
+         "@typescript/no-unused-vars": "warn"
       },
    },
 );
