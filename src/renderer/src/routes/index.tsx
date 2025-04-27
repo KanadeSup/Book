@@ -1,9 +1,11 @@
+import { ErrorComponent } from "@/components/Error/ErrorComponent";
 import { DefaultLayout, Title } from "@/layouts/DefaultLayout";
 import { createFileRoute } from "@tanstack/react-router";
 import { JSX } from "react";
 
 export const Route = createFileRoute("/")({
    component: Index,
+   errorComponent: ErrorComponent
 });
 
 function Index(): JSX.Element {

@@ -1,0 +1,1 @@
+export type ErrorCode = "space-path-not-found"
