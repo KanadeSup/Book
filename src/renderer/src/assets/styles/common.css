@@ -3,5 +3,5 @@ body {
 }
 
 .pop-over-content-trigger-width {
-	width: var(--radix-popover-trigger-width);
+	width: calc(var(--radix-popover-trigger-width) - 15px);
 }

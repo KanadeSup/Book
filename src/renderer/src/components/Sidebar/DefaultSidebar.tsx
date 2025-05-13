@@ -43,7 +43,7 @@ function Header(): JSX.Element {
                Capcut
                <ChevronDown className="w-4 h-4 stroke-[3px]" />
             </PopoverTrigger>
-            <PopoverContent className="w-full pop-over-content-trigger-width border rounded-md border-zinc-500 bg-gray-950">
+            <PopoverContent className="w-full pop-over-content-trigger-width border rounded-md border-zinc-500 bg-black mt-2 overflow-hidden">
                {SettingItems.map((item) => (
                   <div
                      key={item.name}
