@@ -24,7 +24,6 @@ export const Route = createFileRoute("/")({
       if (res.success) {
          return res.data;
       }
-      console.error("routes/index.tsx - createFileRoute(): ", res.errorMessage);
       throw new SpacePathInvalidError("");
    },
    onError: (error) => {
