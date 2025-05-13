@@ -19,7 +19,7 @@ export function VerticleBookCard(props: VerticleBookCardProps) {
                <BookImage className="w-12 h-12 stroke-gray-500" />
             )}
          </AspectRatio>
-         <p className="shrink-0 mt-auto text-center break-all line-clamp-2 font-semibold text-gray-300">
+         <p className="shrink-0 mt-auto text-center  line-clamp-2 font-semibold text-gray-300">
             {props.title}
          </p>
       </div>

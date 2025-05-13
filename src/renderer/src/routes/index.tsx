@@ -55,7 +55,7 @@ function Index(): JSX.Element {
          <Title>
             <h1 className="font-semibold text-lg"> Books </h1>
          </Title>
-         <div className="grid grid-cols-5 gap-3 p-5 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2">
+         <div className="grid grid-cols-5 gap-7 p-5 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2">
             {books.map((book) => (
                <VerticleBookCard
                   key={book.id}
