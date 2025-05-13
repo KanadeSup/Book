@@ -14,6 +14,7 @@ export async function getBooks(directoryPath: string): Promise<CommandResponse<B
    const entries = result.data;
    const returnResult: Book[] = [];
    for (const entry of entries) {
+      if(!entry.name.endsWith(".pdf")) continue;
       returnResult.push({
          id: entry.inode,
          title: entry.name,
