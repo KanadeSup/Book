@@ -42,8 +42,15 @@ createCommand(
    },
 );
 
+createCommand(
+   "command:readFile",
+   async (_, filePath: string) => {
+      const data = await fs.readFileSync(filePath);
+      return data;
+   }
+)
+
 function isDir(path: string) {
-   console.log("called")
    const stat = fs.statSync(path);
    return stat.isDirectory();
 }

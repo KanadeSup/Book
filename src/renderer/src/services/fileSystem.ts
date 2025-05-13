@@ -10,3 +10,10 @@ export async function readDir(directoryPath: string) : Promise<ReadDirRes> {
       directoryPath,
    )) as ReadDirRes;
 }
+
+export async function readFile(filePath: string) : Promise<string> {
+   return (await window.electron.ipcRenderer.invoke(
+      "command:readFile",
+      filePath,
+   )) as string;
+}
