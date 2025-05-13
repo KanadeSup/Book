@@ -47,7 +47,7 @@ export function FolderChooserModal(
          open={props.open}
          onOpenChange={(state) => state == false && props.onClose()}
       >
-         <DialogTrigger></DialogTrigger>
+         <DialogTrigger className="hidden"></DialogTrigger>
          <DialogContent className="text-gray-300" aria-describedby={undefined}>
             <DialogTitle className="hidden" />
             <div className="flex items-center gap-3">

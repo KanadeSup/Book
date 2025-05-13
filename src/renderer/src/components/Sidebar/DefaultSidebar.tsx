@@ -12,7 +12,7 @@ import { useConfigStore } from "@/stores/configStore";
 
 export function DefaultSidebar(): JSX.Element {
    return (
-      <div className="h-screen w-[300px] border-r-2 border-accent">
+      <div className="h-screen w-[300px] border-r-2 border-accent space-y-2">
          <Header />
          <NavList />
       </div>
@@ -78,14 +78,14 @@ const navItems = [
 function NavList(): JSX.Element {
    const location = useLocation();
    return (
-      <div className="px-2">
+      <div className="px-1">
          {navItems.map((item) => (
             <Link
                to={item.to}
                key={item.name}
                className={cn(
-                  "hover:bg-zinc-700 px-3 py-[5px] cursor-pointer flex items-center gap-2 font-semibold rounded-md",
-                  location.pathname == item.to ? "bg-zinc-700" : "",
+                  "hover:bg-accent px-3 py-[5px] cursor-pointer flex items-center gap-2 font-semibold rounded-md",
+                  location.pathname == item.to ? "bg-accent" : "",
                )}
             >
                <item.icon className="w-4 h-4" />
