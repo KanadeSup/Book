@@ -1,7 +1,6 @@
 import { ErrorComponent } from "@/components/Error/ErrorComponent";
 import { DefaultLayout, Title } from "@/layouts/DefaultLayout";
 import { SpacePathInvalidError } from "@/lib/errors/spacePathInvalidError";
-import { UnexceptionError } from "@/lib/errors/unexceptionError";
 import { getBooks } from "@/services/book";
 import { ConfigStore } from "@/stores/configStore";
 import { LocalStorageState } from "@/types/zustand.types";
