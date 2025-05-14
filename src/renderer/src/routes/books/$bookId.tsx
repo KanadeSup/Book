@@ -8,6 +8,7 @@ import { getBooks } from "@/services/book";
 import { SpacePathInvalidError } from "@/lib/errors/spacePathInvalidError";
 import { usePdfStore } from "@/stores/pdfStore";
 import { useShallow } from "zustand/react/shallow";
+import { PdfToolbar } from "@/components/PDF/PdfToolbar";
 
 export const Route = createFileRoute("/books/$bookId")({
    loader: async ({ params }) => {
@@ -65,7 +66,8 @@ function BookViewerPage() {
       loadDocument();
    }, []);
    return (
-      <div>
+      <div className="flex flex-col h-screen">
+         <PdfToolbar />
          <Viewer />
       </div>
    );
