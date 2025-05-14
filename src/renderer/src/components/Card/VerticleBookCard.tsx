@@ -4,11 +4,12 @@ import { AspectRatio } from "../shadcn/aspect-ratio";
 export type VerticleBookCardProps = {
    title: string;
    cover?: string;
+   onClick?: () => void
 };
 
 export function VerticleBookCard(props: VerticleBookCardProps) {
    return (
-      <div className="cursor-pointer select-none hover:scale-105 transition-all">
+      <div className="cursor-pointer select-none hover:scale-105 transition-all" onClick={() => props.onClick?.()}>
          <AspectRatio
             ratio={13 / 16}
             className="flex flex-col border border-gray-500 h-full rounded-sm overflow-hidden center"

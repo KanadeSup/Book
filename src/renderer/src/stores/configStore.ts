@@ -13,7 +13,7 @@ export const useConfigStore = create<ConfigStore>()(
    persist(
       (set) => ({
          config: {
-            spacePath: null,
+            spacePath: "null",
          },
          setConfig: (config) => {
             set(() => ({ config: config }));

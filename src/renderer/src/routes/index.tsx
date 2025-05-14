@@ -5,7 +5,7 @@ import { SpacePathInvalidError } from "@/lib/errors/spacePathInvalidError";
 import { getBookPdfMetaData, getBooks } from "@/services/book";
 import { ConfigStore } from "@/stores/configStore";
 import { LocalStorageState } from "@/types/zustand.types";
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { JSX, useEffect, useState } from "react";
 
 export const Route = createFileRoute("/")({
@@ -40,13 +40,14 @@ export const Route = createFileRoute("/")({
 function Index(): JSX.Element {
    const loaderData = Route.useLoaderData();
    const [books, setBooks] = useState(loaderData.books);
+   const navigate = useNavigate();
    useEffect(() => {
       async function updateBookMetaData() {
          for (const book of books) {
             const metaData = await getBookPdfMetaData(book.filePath);
             book.metaData = metaData;
          }
-         setBooks([...books])
+         setBooks([...books]);
       }
       updateBookMetaData();
    }, []);
@@ -61,6 +62,12 @@ function Index(): JSX.Element {
                   key={book.id}
                   title={book.metaData.title ?? book.fileName}
                   cover={book.metaData.cover}
+                  onClick={() =>
+                     navigate({
+                        to: "/books/$bookId",
+                        params: { bookId: book.id.toString() },
+                     })
+                  }
                />
             ))}
          </div>
