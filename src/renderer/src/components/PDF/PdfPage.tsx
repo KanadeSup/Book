@@ -1,18 +1,23 @@
-import { PDFDocumentProxy, RenderTask } from "pdfjs-dist";
+import { usePdfStore } from "@/stores/pdfStore";
+import { RenderTask } from "pdfjs-dist";
 import { useEffect, useRef } from "react";
+import { useShallow } from "zustand/react/shallow";
 
 export type PdfPageProps = {
-   documentProxy?: PDFDocumentProxy;
    pageNumber: number;
    scale?: number;
 };
 export function PdfPage(props: PdfPageProps) {
    const pageContainerRef = useRef<HTMLDivElement>(null);
    const canvasRef = useRef<HTMLCanvasElement>(null);
+   const { documentProxy } = usePdfStore(
+      useShallow((state) => ({
+         documentProxy: state.documentProxy,
+      })),
+   );
    useEffect(() => {
       const pageContainer = pageContainerRef.current;
       const canvas = canvasRef.current;
-      const documentProxy = props.documentProxy;
       if (!documentProxy || !canvas || !pageContainer) return;
 
       let renderTask: RenderTask | null = null;
@@ -47,7 +52,7 @@ export function PdfPage(props: PdfPageProps) {
          cancelled = true;
          renderTask?.cancel();
       };
-   }, [pageContainerRef.current, props.documentProxy]);
+   }, [documentProxy]);
 
    return (
       <div ref={pageContainerRef} className="">

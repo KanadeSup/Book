@@ -2,11 +2,12 @@ import { Viewer } from "@/components/PDF/Viewer";
 import { pdfjs } from "@/lib/pdfjs";
 import { readFile } from "@/services/fileSystem";
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { PDFDocumentProxy } from "pdfjs-dist";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useConfigStore } from "@/stores/configStore";
 import { getBooks } from "@/services/book";
 import { SpacePathInvalidError } from "@/lib/errors/spacePathInvalidError";
+import { usePdfStore } from "@/stores/pdfStore";
+import { useShallow } from "zustand/react/shallow";
 
 export const Route = createFileRoute("/books/$bookId")({
    loader: async ({ params }) => {
@@ -39,19 +40,33 @@ export const Route = createFileRoute("/books/$bookId")({
 });
 
 function BookViewerPage() {
-   const [documentProxy, setDocumentProxy] = useState<PDFDocumentProxy>()
    const { book } = Route.useLoaderData();
-   useEffect(() =>{
+   const { setDocumentProxy, setPdfState } = usePdfStore(
+      useShallow((state) => ({
+         setDocumentProxy: state.setDocumentProxy,
+         setPdfState: state.setPdfState,
+      })),
+   );
+   useEffect(() => {
       async function loadDocument() {
          const fileData = await readFile(book.filePath);
          const proxy = await pdfjs.getDocument({ data: fileData }).promise;
-         setDocumentProxy(proxy)
+         const pageProxy = await proxy.getPage(1);
+         const viewport = pageProxy.getViewport({ scale: 1 });
+         setPdfState({
+            numPages: proxy.numPages,
+            originalDimension: {
+               width: viewport.width,
+               height: viewport.height,
+            },
+         });
+         setDocumentProxy(proxy);
       }
-      loadDocument()
-   }, [])
+      loadDocument();
+   }, []);
    return (
       <div>
-         <Viewer documentProxy={documentProxy}/>
+         <Viewer />
       </div>
-   )
+   );
 }
