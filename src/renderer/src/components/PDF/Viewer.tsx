@@ -15,19 +15,41 @@ type Dimension = {
 export function Viewer() {
    const viewContainerRef = useRef<HTMLDivElement>(null);
    const [viewDimension, setViewDimension] = useState<Dimension>();
-   const { documentProxy, numPages, originalDimension } = usePdfStore(
-      useShallow((state) => ({
-         documentProxy: state.documentProxy,
-         numPages: state.state.numPages,
-         originalDimension: state.state.originalDimension,
-      })),
-   );
+   const [itemSize, setItemSize] = useState<number>(1);
+   const { documentProxy, numPages, originalDimension, currentScale } =
+      usePdfStore(
+         useShallow((state) => ({
+            documentProxy: state.documentProxy,
+            numPages: state.state.numPages,
+            originalDimension: state.state.originalDimension,
+            currentScale: state.state.currentScale,
+         })),
+      );
 
    const scale = useMemo(() => {
       if (!originalDimension || !viewDimension) return 1;
-      return viewDimension.height / originalDimension.height;
-   }, [originalDimension, viewDimension]);
-
+      if (currentScale.scaleType === "fit-width") {
+         setItemSize(
+            originalDimension.width *
+               (viewDimension.width / originalDimension.width),
+         );
+         return viewDimension.width / originalDimension.width;
+      }
+      if (currentScale.scaleType === "fit-height") {
+         setItemSize(
+            originalDimension.height *
+               (viewDimension.height / originalDimension.height),
+         );
+         return viewDimension.height / originalDimension.height;
+      }
+      if (currentScale.scaleType === "percentage" && currentScale.scaleValue) {
+         setItemSize(
+            originalDimension.height * (currentScale.scaleValue / 100),
+         );
+         return currentScale.scaleValue / 100;
+      }
+      return 1;
+   }, [originalDimension, viewDimension, currentScale]);
    useEffect(() => {
       const viewContainer = viewContainerRef.current;
       if (!viewContainer || !documentProxy || !originalDimension) return;
@@ -35,7 +57,7 @@ export function Viewer() {
          width: viewContainer.offsetWidth,
          height: viewContainer.offsetHeight,
       });
-   }, [documentProxy, originalDimension, viewContainerRef.current]);
+   }, [documentProxy, originalDimension]);
 
    const PageRow = ({ index, style }) => {
       return (
@@ -58,7 +80,7 @@ export function Viewer() {
                      height={height}
                      width={width}
                      itemCount={numPages}
-                     itemSize={viewDimension.height}
+                     itemSize={itemSize}
                   >
                      {PageRow}
                   </FixedSizeList>

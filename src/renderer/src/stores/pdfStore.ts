@@ -11,6 +11,10 @@ export type PdfStore = {
          width: number;
          height: number;
       };
+      currentScale: {
+         scaleValue?: number;
+         scaleType: "fit-width" | "fit-height" | "percentage";
+      };
    };
    setPdfState: (state: Partial<PdfStore["state"]>) => void;
 };
@@ -19,6 +23,9 @@ export const usePdfStore = create<PdfStore>((set) => ({
    state: {
       numPages: 0,
       currentPage: 1,
+      currentScale: {
+         scaleType: "fit-width",
+      },
    },
    setDocumentProxy: (documentProxy) => set({ documentProxy }),
    setPdfState: (state) => {

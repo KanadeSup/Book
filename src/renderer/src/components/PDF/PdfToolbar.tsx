@@ -5,8 +5,9 @@ import {
    SelectContent,
    SelectItem,
    SelectTrigger,
-   SelectValue,
 } from "../shadcn/select";
+import { usePdfStore } from "@/stores/pdfStore";
+import { useShallow } from "zustand/react/shallow";
 
 export function PdfToolbar() {
    return (
@@ -30,6 +31,13 @@ export function PdfToolbar() {
 }
 
 const SizeSelector = () => {
+   const { currentScale, setPdfState } = usePdfStore(
+      useShallow((state) => ({
+         currentScale: state.state.currentScale,
+         setPdfState: state.setPdfState,
+      })),
+   );
+
    const items = [
       {
          value: "fit-width",
@@ -72,20 +80,47 @@ const SizeSelector = () => {
          label: "500%",
       },
    ];
+   const handleScaleChange = (value: string) => {
+      if (value === "fit-width" || value === "fit-height") {
+         setPdfState({
+            currentScale: {
+               scaleType: value,
+            },
+         });
+      } else {
+         setPdfState({
+            currentScale: {
+               scaleType: "percentage",
+               scaleValue: parseInt(value),
+            },
+         });
+      }
+   };
    return (
       <div>
-         <Select>
+         <Select
+            defaultValue={items[0].value}
+            onValueChange={handleScaleChange}
+         >
             <SelectTrigger className="cursor-pointer focus-visible:outline-none  focus-visible:ring-0 focus-visible:border-gray-600 border border-gray-600">
-               <SelectValue placeholder="20%" />
+               {currentScale.scaleType === "percentage" && (
+                  <p>{currentScale.scaleValue}%</p>
+               )}
+               {currentScale.scaleType === "fit-width" && <p>Fit to width</p>}
+               {currentScale.scaleType === "fit-height" && <p>Fit to height</p>}
             </SelectTrigger>
             <SelectContent align="center">
                {items.map((item) => (
-                  <SelectItem key={item.value} value={item.value} className="cursor-pointer">
+                  <SelectItem
+                     key={item.value}
+                     value={item.value}
+                     className="cursor-pointer"
+                  >
                      {item.label}
                   </SelectItem>
                ))}
             </SelectContent>
          </Select>
       </div>
-   )
-}
+   );
+};
