@@ -42,12 +42,12 @@ function BookViewerPage() {
    const [documentProxy, setDocumentProxy] = useState<PDFDocumentProxy>()
    const { book } = Route.useLoaderData();
    useEffect(() =>{
-      async function fetch() {
+      async function loadDocument() {
          const fileData = await readFile(book.filePath);
          const proxy = await pdfjs.getDocument({ data: fileData }).promise;
          setDocumentProxy(proxy)
       }
-      fetch()
+      loadDocument()
    }, [])
    return (
       <div>
