@@ -8,24 +8,26 @@ import {
 } from "../shadcn/select";
 import { usePdfStore } from "@/stores/pdfStore";
 import { useShallow } from "zustand/react/shallow";
+import { cn } from "@/utils/tailwindUtils";
 
-export function PdfToolbar() {
+export type PdfToolbarProps = {
+   className?: string;
+};
+export function PdfToolbar(props: PdfToolbarProps) {
    return (
-      <div className="group fixed top-0 left-0 right-0 z-50">
-         <div className="flex justify-between items-center bg-[#21242A] border-b border-gray-600 px-6 py-1  group-hover:opacity-100 transition-all">
-            {/* Left section */}
-            <div className="flex items-center gap-2">
-               <IconButton className="w-8 h-8 hover:bg-black/30">
-                  <Sidebar className="w-4 h-4" />
-               </IconButton>
-            </div>
-            {/* Center section */}
-            <div className="flex items-center gap-2">
-               <SizeSelector />
-            </div>
-            {/* Right section */}
-            <div className="flex items-center gap-2"></div>
+      <div className={cn("flex justify-between items-center bg-sidebar border-b border-accent px-6 py-1", props.className)}>
+         {/* Left section */}
+         <div className="flex items-center gap-2">
+            <IconButton className="w-8 h-8 hover:bg-black/30">
+               <Sidebar className="w-4 h-4" />
+            </IconButton>
          </div>
+         {/* Center section */}
+         <div className="flex items-center gap-2">
+            <SizeSelector />
+         </div>
+         {/* Right section */}
+         <div className="flex items-center gap-2"></div>
       </div>
    );
 }

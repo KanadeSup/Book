@@ -9,7 +9,7 @@ import { SpacePathInvalidError } from "@/lib/errors/spacePathInvalidError";
 import { usePdfStore } from "@/stores/pdfStore";
 import { useShallow } from "zustand/react/shallow";
 import { PdfToolbar } from "@/components/PDF/PdfToolbar";
-
+import { PdfOutlineSidebar } from "@/components/PDF/PdfOutlineSidebar";
 export const Route = createFileRoute("/books/$bookId")({
    loader: async ({ params }) => {
       const bookId = params.bookId;
@@ -66,9 +66,17 @@ function BookViewerPage() {
       loadDocument();
    }, []);
    return (
-      <div className="flex flex-col h-screen">
-         <PdfToolbar />
-         <PdfViewer />
+      <div className="flex flex-row h-screen">
+         <div className="w-[300px] border-r border-accent">
+            <PdfOutlineSidebar />
+         </div>
+
+         <div className="w-full relative">
+            <div className="absolute top-0 left-0 right-0 z-50">
+               <PdfToolbar />
+            </div>
+            <PdfViewer />
+         </div>
       </div>
    );
 }
