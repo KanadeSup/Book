@@ -68,7 +68,11 @@ export function Viewer() {
    };
 
    return (
-      <div className="w-full h-screen" ref={viewContainerRef}>
+      <div
+         className="pdfViewer w-full h-screen box-content"
+         ref={viewContainerRef}
+         style={{ "--scale-factor": scale } as React.CSSProperties}
+      >
          <AutoSizer>
             {({ height, width }) => {
                // If Everything is not set which means the setup is not finished, return empty div

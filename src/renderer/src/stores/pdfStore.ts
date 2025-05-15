@@ -24,7 +24,7 @@ export const usePdfStore = create<PdfStore>((set) => ({
       numPages: 0,
       currentPage: 1,
       currentScale: {
-         scaleType: "fit-width",
+         scaleType: "fit-height",
       },
    },
    setDocumentProxy: (documentProxy) => set({ documentProxy }),

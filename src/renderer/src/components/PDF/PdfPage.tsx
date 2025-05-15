@@ -1,5 +1,5 @@
 import { usePdfStore } from "@/stores/pdfStore";
-import { RenderTask } from "pdfjs-dist";
+import { RenderTask, TextLayer } from "pdfjs-dist";
 import { useEffect, useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
 
@@ -8,17 +8,20 @@ export type PdfPageProps = {
    scale?: number;
 };
 export function PdfPage(props: PdfPageProps) {
-   const pageContainerRef = useRef<HTMLDivElement>(null);
    const canvasRef = useRef<HTMLCanvasElement>(null);
+   const textLayerRef = useRef<HTMLDivElement>(null);
+   const pageRef = useRef<HTMLDivElement>(null);
    const { documentProxy } = usePdfStore(
       useShallow((state) => ({
          documentProxy: state.documentProxy,
       })),
    );
    useEffect(() => {
-      const pageContainer = pageContainerRef.current;
       const canvas = canvasRef.current;
-      if (!documentProxy || !canvas || !pageContainer) return;
+      const textLayerDiv = textLayerRef.current;
+      const pageDiv = pageRef.current;
+      if (!documentProxy || !canvas || !textLayerDiv || !pageDiv)
+         return;
 
       let renderTask: RenderTask | null = null;
       let cancelled = false;
@@ -31,9 +34,8 @@ export function PdfPage(props: PdfPageProps) {
          canvas.width = viewport.width;
          canvas.height = viewport.height;
 
-         // Set dimension
-         canvas.style.width = `${viewport.width}px`;
-         canvas.style.height = `${viewport.height}px`;
+         pageDiv.style.width = `${viewport.width}px`;
+         pageDiv.style.height = `${viewport.height}px`;
 
          // render page
          const ctx = canvas.getContext("2d");
@@ -46,6 +48,14 @@ export function PdfPage(props: PdfPageProps) {
             viewport: viewport,
          });
          await renderTask.promise;
+         // textLayerDiv.style.width = `${viewport.width}px`;
+         // textLayerDiv.style.height = `${viewport.height}px`;
+         const textLayer = new TextLayer({
+            textContentSource: await pageProxy.getTextContent(),
+            container: textLayerDiv,
+            viewport: viewport,
+         });
+         textLayer.render();
       };
       renderPage();
       return () => {
@@ -55,8 +65,14 @@ export function PdfPage(props: PdfPageProps) {
    }, [documentProxy]);
 
    return (
-      <div ref={pageContainerRef} className="">
-         <canvas ref={canvasRef} className=""></canvas>
+      <div ref={pageRef} className="page bg-blue-500">
+         <div className="canvasWrapper">
+            <canvas className="canvasWrapper" ref={canvasRef}></canvas>
+         </div>
+         <div
+            ref={textLayerRef}
+            className="textLayer"
+         ></div>
       </div>
    );
 }

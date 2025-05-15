@@ -40,12 +40,12 @@ const SizeSelector = () => {
 
    const items = [
       {
-         value: "fit-width",
-         label: "Fit to width",
-      },
-      {
          value: "fit-height",
          label: "Fit to height",
+      },
+      {
+         value: "fit-width",
+         label: "Fit to width",
       },
       {
          value: "10",
