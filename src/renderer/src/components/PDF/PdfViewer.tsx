@@ -6,13 +6,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { usePdfStore } from "@/stores/pdfStore";
 import { useShallow } from "zustand/react/shallow";
 
-export type ViewerProps = {};
+export type PdfViewerProps = {};
 
 type Dimension = {
    width: number;
    height: number;
 };
-export function Viewer() {
+export function PdfViewer() {
    const viewContainerRef = useRef<HTMLDivElement>(null);
    const [viewDimension, setViewDimension] = useState<Dimension>();
    const [itemSize, setItemSize] = useState<number>(1);

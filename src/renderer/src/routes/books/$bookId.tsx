@@ -1,4 +1,4 @@
-import { Viewer } from "@/components/PDF/Viewer";
+import { PdfViewer } from "@/components/PDF/PdfViewer";
 import { pdfjs } from "@/lib/pdfjs";
 import { readFile } from "@/services/fileSystem";
 import { createFileRoute, redirect } from "@tanstack/react-router";
@@ -68,7 +68,7 @@ function BookViewerPage() {
    return (
       <div className="flex flex-col h-screen">
          <PdfToolbar />
-         <Viewer />
+         <PdfViewer />
       </div>
    );
 }
