@@ -65,9 +65,9 @@ export function PdfPage(props: PdfPageProps) {
    }, [documentProxy]);
 
    return (
-      <div ref={pageRef} className="page bg-blue-500">
+      <div ref={pageRef} className="page" style={{border: "none"}}>
          <div className="canvasWrapper">
-            <canvas className="canvasWrapper" ref={canvasRef}></canvas>
+            <canvas ref={canvasRef}></canvas>
          </div>
          <div
             ref={textLayerRef}
