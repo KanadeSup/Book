@@ -99,8 +99,8 @@ const SizeSelector = () => {
    return (
       <div>
          <Select
-            defaultValue={items[0].value}
             onValueChange={handleScaleChange}
+            value={currentScale.scaleType !== "percentage" ? currentScale.scaleType : currentScale.scaleValue?.toString()}
          >
             <SelectTrigger className="cursor-pointer focus-visible:outline-none  focus-visible:ring-0 focus-visible:border-gray-600 border border-gray-600">
                {currentScale.scaleType === "percentage" && (
@@ -109,7 +109,7 @@ const SizeSelector = () => {
                {currentScale.scaleType === "fit-width" && <p>Fit to width</p>}
                {currentScale.scaleType === "fit-height" && <p>Fit to height</p>}
             </SelectTrigger>
-            <SelectContent align="center">
+            <SelectContent align="center" className="w-[150px]">
                {items.map((item) => (
                   <SelectItem
                      key={item.value}
