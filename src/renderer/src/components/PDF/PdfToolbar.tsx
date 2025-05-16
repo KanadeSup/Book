@@ -26,7 +26,7 @@ export function PdfToolbar(props: PdfToolbarProps) {
    return (
       <div
          className={cn(
-            "flex justify-between items-center bg-sidebar border-b border-accent px-6 py-1",
+            "flex justify-between items-center bg-sidebar border-b border-accent px-2 py-1",
             props.className,
          )}
       >
