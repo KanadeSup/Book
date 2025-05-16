@@ -38,9 +38,29 @@ export function PdfViewer() {
 
    const scale = useMemo(() => {
       if (!originalDimension || !viewDimension) return 1;
-      if (currentScale.scaleType === "fit-width") {
+      if (
+         currentScale.scaleType === "fit-width" &&
+         viewControl.pageLayout === "single-page"
+      ) {
          const scaleValue = viewDimension.width / originalDimension.width;
          setItemSize(originalDimension.width * scaleValue);
+         setPdfState({
+            currentScale: {
+               scaleType: "fit-width",
+               scaleValue: Math.round(scaleValue * 100),
+            },
+         });
+         return scaleValue;
+      }
+      if (
+         currentScale.scaleType === "fit-width" &&
+         (viewControl.pageLayout === "double-page" ||
+            viewControl.pageLayout === "cover-facing-page")
+      ) {
+         const pageWidthIncludeBorder =
+            originalDimension.width * 2 + pageBorderSize * 2;
+         const scaleValue = viewDimension.width / pageWidthIncludeBorder;
+         setItemSize(originalDimension.height * scaleValue);
          setPdfState({
             currentScale: {
                scaleType: "fit-width",
@@ -72,6 +92,7 @@ export function PdfViewer() {
       viewDimension,
       currentScale.scaleValue,
       currentScale.scaleType,
+      viewControl.pageLayout,
    ]);
 
    useEffect(() => {
