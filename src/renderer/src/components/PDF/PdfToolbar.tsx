@@ -17,6 +17,7 @@ import { usePdfStore } from "@/stores/pdfStore";
 import { useShallow } from "zustand/react/shallow";
 import { Popover, PopoverContent, PopoverTrigger } from "../shadcn/popover";
 import { cn } from "@/utils/tailwindUtils";
+import { useState } from "react";
 
 export type PdfToolbarProps = {
    className?: string;
@@ -176,10 +177,10 @@ function ViewControl() {
          icon: Columns2,
       },
    ];
-   const selectedItem = {
+   const [selectedItem, setSelectedItem] = useState({
       pageTransition: pageTransitionItem[0].value,
       pageLayout: pageLayoutItem[0].value,
-   };
+   });
    return (
       <div>
          <Popover>
@@ -188,7 +189,7 @@ function ViewControl() {
                   <Eye className="w-4 h-4" />
                </IconButton>
             </PopoverTrigger>
-            <PopoverContent className="border-gray-600 border p-1 text-sm">
+            <PopoverContent className="border-gray-600 border p-1 text-[13px]">
                <div>
                   <h1 className="text-gray-200 p-1"> Page transition </h1>
                   <div className="space-y-1">
@@ -201,6 +202,12 @@ function ViewControl() {
                                  ? "bg-accent"
                                  : "",
                            )}
+                           onClick={() => {
+                              setSelectedItem((prev) => ({
+                                 ...prev,
+                                 pageTransition: item.value,
+                              }));
+                           }}
                         >
                            <item.icon className="w-5 h-5" />
                            {item.label}
@@ -221,6 +228,12 @@ function ViewControl() {
                                  ? "bg-accent"
                                  : "",
                            )}
+                           onClick={() => {
+                              setSelectedItem((prev) => ({
+                                 ...prev,
+                                 pageLayout: item.value,
+                              }));
+                           }}
                         >
                            <item.icon className="w-5 h-5" />
                            {item.label}
