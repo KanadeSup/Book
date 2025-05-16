@@ -6,6 +6,7 @@ import { useShallow } from "zustand/react/shallow";
 import { Expander } from "../Expander/Expander";
 import { ExpanderContent } from "../Expander/Expander";
 import { cn } from "@/utils/tailwindUtils";
+import { ScrollArea } from "../shadcn/scroll-area";
 
 export function PdfOutlineSidebar() {
    const { documentProxy } = usePdfStore(
@@ -23,17 +24,17 @@ export function PdfOutlineSidebar() {
       loadOutline();
    }, [documentProxy]);
    return (
-      <div className="h-full w-full bg-sidebar">
-         <div className="flex items-center h-[45px] justify-center border-b border-accent">
+      <div className="h-full w-full bg-sidebar flex flex-col">
+         <div className="flex items-center h-[41px] justify-center border-b border-accent shrink-0">
             <h1 className="text-gray-200 font-bold text-center tracking-wider">
                Book Outline
             </h1>
          </div>
-         <div className="flex flex-col gap-2 mt-5 px-2">
+         <ScrollArea className="flex flex-col gap-2 mt-5 px-2 overflow-auto">
             {outlines.map((outline) => (
                <OutlineItem key={outline.title} outline={outline} />
             ))}
-         </div>
+         </ScrollArea>
       </div>
    );
 }
