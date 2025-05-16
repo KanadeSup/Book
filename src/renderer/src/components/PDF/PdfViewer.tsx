@@ -17,6 +17,7 @@ export function PdfViewer() {
    const [viewDimension, setViewDimension] = useState<Dimension>();
    const [itemSize, setItemSize] = useState<number>(1);
    const scrollAmountTotal = useRef<number>(0);
+   const [pageBorderSize, setPageBorderSize] = useState<number>(10);
    const {
       documentProxy,
       numPages,
@@ -93,26 +94,52 @@ export function PdfViewer() {
       if (viewControl.pageLayout === "double-page") {
          return (
             <div style={style} className="flex justify-center">
-               <PdfPage pageNumber={index * 2 + 1} scale={scale} />
-               <PdfPage pageNumber={index * 2 + 2} scale={scale} />
+               <PdfPage
+                  pageNumber={index * 2 + 1}
+                  scale={scale}
+                  borderSize={pageBorderSize}
+               />
+               <PdfPage
+                  pageNumber={index * 2 + 2}
+                  scale={scale}
+                  borderSize={pageBorderSize}
+               />
             </div>
          );
       }
       if (viewControl.pageLayout === "cover-facing-page") {
          return index === 0 ? (
             <div style={style} className="flex justify-center">
-               <PdfPage pageNumber={index + 1} scale={scale} />
+               <PdfPage
+                  pageNumber={index + 1}
+                  scale={scale}
+                  borderSize={pageBorderSize}
+               />
             </div>
          ) : (
             <div style={style} className="flex justify-center">
-               <PdfPage pageNumber={index * 2} scale={scale} />
-               <PdfPage pageNumber={index * 2 + 1} scale={scale} />
+               <PdfPage
+                  pageNumber={index * 2}
+                  scale={scale}
+                  borderSize={pageBorderSize}
+               />
+               <PdfPage
+                  pageNumber={index * 2 + 1}
+                  scale={scale}
+                  borderSize={pageBorderSize}
+               />
             </div>
          );
       }
+
+      // fallback to single page layout
       return (
          <div style={style} className="flex justify-center">
-            <PdfPage pageNumber={index + 1} scale={scale} />
+            <PdfPage
+               pageNumber={index + 1}
+               scale={scale}
+               borderSize={pageBorderSize}
+            />
          </div>
       );
    };
@@ -173,7 +200,7 @@ export function PdfViewer() {
                      height={height}
                      width={width}
                      itemCount={numPages}
-                     itemSize={itemSize}
+                     itemSize={itemSize + pageBorderSize * 2}
                   >
                      {PageRow}
                   </FixedSizeList>

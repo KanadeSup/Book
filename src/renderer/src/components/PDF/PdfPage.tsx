@@ -6,6 +6,7 @@ import { useShallow } from "zustand/react/shallow";
 export type PdfPageProps = {
    pageNumber: number;
    scale?: number;
+   borderSize?: number;
 };
 export function PdfPage(props: PdfPageProps) {
    const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -65,7 +66,7 @@ export function PdfPage(props: PdfPageProps) {
    }, [documentProxy]);
 
    return (
-      <div ref={pageRef} className="page m-0!">
+      <div ref={pageRef} className="page m-0! box-content" style={{border: `${props.borderSize ?? 0}px solid transparent`}}>
          <div className="canvasWrapper">
             <canvas ref={canvasRef}></canvas>
          </div>
