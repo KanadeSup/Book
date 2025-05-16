@@ -17,17 +17,23 @@ export function PdfViewer() {
    const [viewDimension, setViewDimension] = useState<Dimension>();
    const [itemSize, setItemSize] = useState<number>(1);
    const scrollAmountTotal = useRef<number>(0);
-   const { documentProxy, numPages, originalDimension, currentScale, setPdfState } =
-      usePdfStore(
-         useShallow((state) => ({
-            documentProxy: state.documentProxy,
-            numPages: state.state.numPages,
-            originalDimension: state.state.originalDimension,
-            currentScale: state.state.currentScale,
-            setPdfState: state.setPdfState,
-         })),
-      );
-   
+   const {
+      documentProxy,
+      numPages,
+      originalDimension,
+      currentScale,
+      setPdfState,
+      viewControl,
+   } = usePdfStore(
+      useShallow((state) => ({
+         documentProxy: state.documentProxy,
+         numPages: state.state.numPages,
+         originalDimension: state.state.originalDimension,
+         currentScale: state.state.currentScale,
+         setPdfState: state.setPdfState,
+         viewControl: state.state.viewControl,
+      })),
+   );
 
    const scale = useMemo(() => {
       if (!originalDimension || !viewDimension) return 1;
@@ -60,7 +66,12 @@ export function PdfViewer() {
          return currentScale.scaleValue / 100;
       }
       return 1;
-   }, [originalDimension, viewDimension, currentScale.scaleValue, currentScale.scaleType]);
+   }, [
+      originalDimension,
+      viewDimension,
+      currentScale.scaleValue,
+      currentScale.scaleType,
+   ]);
 
    useEffect(() => {
       const viewContainer = viewContainerRef.current;
@@ -72,6 +83,33 @@ export function PdfViewer() {
    }, [documentProxy, originalDimension]);
 
    const PageRow = ({ index, style }) => {
+      if (viewControl.pageLayout === "single-page") {
+         return (
+            <div style={style} className="flex justify-center">
+               <PdfPage pageNumber={index + 1} scale={scale} />
+            </div>
+         );
+      }
+      if (viewControl.pageLayout === "double-page") {
+         return (
+            <div style={style} className="flex justify-center">
+               <PdfPage pageNumber={index * 2 + 1} scale={scale} />
+               <PdfPage pageNumber={index * 2 + 2} scale={scale} />
+            </div>
+         );
+      }
+      if (viewControl.pageLayout === "cover-facing-page") {
+         return index === 0 ? (
+            <div style={style} className="flex justify-center">
+               <PdfPage pageNumber={index + 1} scale={scale} />
+            </div>
+         ) : (
+            <div style={style} className="flex justify-center">
+               <PdfPage pageNumber={index * 2} scale={scale} />
+               <PdfPage pageNumber={index * 2 + 1} scale={scale} />
+            </div>
+         );
+      }
       return (
          <div style={style} className="flex justify-center">
             <PdfPage pageNumber={index + 1} scale={scale} />
@@ -97,7 +135,6 @@ export function PdfViewer() {
          scrollAmountTotal.current += eventScrollAmount;
       }
 
-      
       if (scrollAmountTotal.current > THRESHOLD) {
          currentScale.scaleValue = currentScale.scaleValue - 10;
          scrollAmountTotal.current = 0;
