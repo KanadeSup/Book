@@ -13,11 +13,14 @@ import {
    SelectItem,
    SelectTrigger,
 } from "../shadcn/select";
-import { usePdfStore } from "@/stores/pdfStore";
+import {
+   PageLayoutView,
+   PageTransitionView,
+   usePdfStore,
+} from "@/stores/pdfStore";
 import { useShallow } from "zustand/react/shallow";
 import { Popover, PopoverContent, PopoverTrigger } from "../shadcn/popover";
 import { cn } from "@/utils/tailwindUtils";
-import { useState } from "react";
 
 export type PdfToolbarProps = {
    className?: string;
@@ -147,8 +150,18 @@ const SizeSelector = () => {
    );
 };
 
+type PageTransitionItem = {
+   label: string;
+   value: PageTransitionView;
+   icon: React.ElementType;
+};
+type PageLayoutItem = {
+   label: string;
+   value: PageLayoutView;
+   icon: React.ElementType;
+};
 function ViewControl() {
-   const pageTransitionItem = [
+   const pageTransitionItem: PageTransitionItem[] = [
       {
          label: "Continuous page",
          value: "continuous-page",
@@ -160,7 +173,7 @@ function ViewControl() {
          icon: FileStack,
       },
    ];
-   const pageLayoutItem = [
+   const pageLayoutItem: PageLayoutItem[] = [
       {
          label: "Single page",
          value: "single-page",
@@ -177,10 +190,7 @@ function ViewControl() {
          icon: Columns2,
       },
    ];
-   const [selectedItem, setSelectedItem] = useState({
-      pageTransition: pageTransitionItem[0].value,
-      pageLayout: pageLayoutItem[0].value,
-   });
+   const viewControl = usePdfStore((state) => state.state.viewControl);
    return (
       <div>
          <Popover>
@@ -198,14 +208,20 @@ function ViewControl() {
                            key={item.value}
                            className={cn(
                               "px-2 py-1 hover:bg-accent cursor-pointer transition-all rounded-md flex items-center gap-1",
-                              selectedItem.pageTransition === item.value
+                              item.value === viewControl.pageTransition
                                  ? "bg-accent"
                                  : "",
                            )}
                            onClick={() => {
-                              setSelectedItem((prev) => ({
-                                 ...prev,
-                                 pageTransition: item.value,
+                              usePdfStore.setState((state) => ({
+                                 ...state,
+                                 state: {
+                                    ...state.state,
+                                    viewControl: {
+                                       ...state.state.viewControl,
+                                       pageTransition: item.value,
+                                    },
+                                 },
                               }));
                            }}
                         >
@@ -224,14 +240,20 @@ function ViewControl() {
                            key={item.value}
                            className={cn(
                               "px-2 py-1 hover:bg-accent cursor-pointer transition-all rounded-md flex items-center gap-1",
-                              selectedItem.pageLayout === item.value
+                              item.value === viewControl.pageLayout
                                  ? "bg-accent"
                                  : "",
                            )}
                            onClick={() => {
-                              setSelectedItem((prev) => ({
-                                 ...prev,
-                                 pageLayout: item.value,
+                              usePdfStore.setState((state) => ({
+                                 ...state,
+                                 state: {
+                                    ...state.state,
+                                    viewControl: {
+                                       ...state.state.viewControl,
+                                       pageLayout: item.value,
+                                    },
+                                 },
                               }));
                            }}
                         >
