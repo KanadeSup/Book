@@ -1,10 +1,11 @@
 import "pdfjs-dist/web/pdf_viewer.css";
-import { FixedSizeList } from "react-window";
+import { FixedSizeList, ListOnScrollProps } from "react-window";
 import { PdfPage } from "./PdfPage";
 import AutoSizer from "react-virtualized-auto-sizer";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePdfStore } from "@/stores/pdfStore";
 import { useShallow } from "zustand/react/shallow";
+import throttle from 'lodash/throttle';
 
 export type PdfViewerProps = {};
 
@@ -202,6 +203,13 @@ export function PdfViewer() {
          });
       }
    };
+   const handleScroll = throttle(({ scrollOffset }: ListOnScrollProps) => {
+      const pageSize = itemSize + pageBorderSize * 2;
+      const currentPage = Math.round(scrollOffset / pageSize) + 1;
+      setPdfState({
+         currentPage,
+      });
+   }, 100);
 
    return (
       <div
@@ -222,6 +230,7 @@ export function PdfViewer() {
                      width={width}
                      itemCount={numPages}
                      itemSize={itemSize + pageBorderSize * 2}
+                     onScroll={handleScroll}
                   >
                      {PageRow}
                   </FixedSizeList>
