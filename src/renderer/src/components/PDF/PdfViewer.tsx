@@ -18,6 +18,7 @@ export function PdfViewer() {
    const [viewDimension, setViewDimension] = useState<Dimension>();
    const [itemSize, setItemSize] = useState<number>(1);
    const scrollAmountTotal = useRef<number>(0);
+   const contentScrollContainerRef = useRef<FixedSizeList<any>>(null);
    const pageBorderSize = 10;
    const {
       documentProxy,
@@ -25,8 +26,8 @@ export function PdfViewer() {
       originalDimension,
       currentScale,
       setPdfState,
-      setPageScrollContainer,
       viewControl,
+      navigatePageIndex,
    } = usePdfStore(
       useShallow((state) => ({
          documentProxy: state.documentProxy,
@@ -35,7 +36,7 @@ export function PdfViewer() {
          currentScale: state.state.currentScale,
          setPdfState: state.setPdfState,
          viewControl: state.state.viewControl,
-         setPageScrollContainer: state.setPageScrollContainer,
+         navigatePageIndex: state.state.navigatePageIndex,
       })),
    );
 
@@ -75,6 +76,16 @@ export function PdfViewer() {
       viewControl.pageLayout,
       currentScale.scaleValue,
    ]);
+
+   // This useEffect is used to navigate to the page when property navigatePage is set/changed.
+   // Note: The container element is conditionally rendered, so it may not be available on the
+   // first render. We include the ref in the useEffect dependency array to ensure the effect runs
+   // again when the container mounts.
+   useEffect(() => {
+      if (!navigatePageIndex || !contentScrollContainerRef.current) return;
+      const navigateIndex = navigatePageIndex;
+      contentScrollContainerRef.current.scrollToItem(navigateIndex, "start");
+   }, [navigatePageIndex, contentScrollContainerRef.current]);
 
    useEffect(() => {
       const viewContainer = viewContainerRef.current;
@@ -265,10 +276,7 @@ export function PdfViewer() {
                }
                return (
                   <FixedSizeList
-                     ref={(fixedSizeList) => {
-                        if (!fixedSizeList) return;
-                        setPageScrollContainer(fixedSizeList);
-                     }}
+                     ref={contentScrollContainerRef}
                      height={height}
                      className="dark-lean-scrollbar"
                      width="100%"

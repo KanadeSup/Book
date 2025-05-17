@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { PDFDocumentProxy } from "pdfjs-dist";
-import { FixedSizeList } from "react-window";
 import { debounce } from "lodash";
 import { subscribeWithSelector } from "zustand/middleware";
 
@@ -13,7 +12,6 @@ export type PageLayoutView =
 export type PdfStore = {
    documentProxy: PDFDocumentProxy | null;
    setDocumentProxy: (documentProxy: PDFDocumentProxy) => void;
-   pageScrollContainer: FixedSizeList<any> | null;
    state: {
       numPages: number;
       currentPage: number;
@@ -29,10 +27,11 @@ export type PdfStore = {
          pageTransition: PageTransitionView;
          pageLayout: PageLayoutView;
       };
+      navigatePageIndex: number | null;
    };
    setPdfState: (state: Partial<PdfStore["state"]>) => void;
-   setPageScrollContainer: (pageScrollContainer: FixedSizeList<any>) => void;
    loadSavedState: () => void;
+   navigateToPage: (page: number) => void;
 };
 export const usePdfStore = create<PdfStore>()(
    subscribeWithSelector((set) => ({
@@ -48,6 +47,7 @@ export const usePdfStore = create<PdfStore>()(
             pageTransition: "continuous-page",
             pageLayout: "single-page",
          },
+         navigatePageIndex: null,
       },
       setDocumentProxy: (documentProxy) => set({ documentProxy }),
       setPdfState: (state) => {
@@ -55,8 +55,6 @@ export const usePdfStore = create<PdfStore>()(
             state: { ...currentState.state, ...state },
          }));
       },
-      setPageScrollContainer: (pageScrollContainer) =>
-         set({ pageScrollContainer }),
       loadSavedState: () => {
          const path = window.location.pathname;
          if (!path.includes("books")) return;
@@ -70,11 +68,15 @@ export const usePdfStore = create<PdfStore>()(
             state: { ...currentState.state, ...parsedState },
          }));
       },
+      navigateToPage: (page) =>
+         set((currentState) => ({
+            state: { ...currentState.state, navigatePageIndex: page },
+         })),
    })),
 );
 
 type SaveState = {
-   currentPage: number;
+   navigatePageIndex: number | null;
    viewControl: PdfStore["state"]["viewControl"];
 };
 const saveState = debounce((state: SaveState) => {
@@ -92,7 +94,12 @@ usePdfStore.subscribe(
       viewControl: state.state.viewControl,
       currentScale: state.state.currentScale,
    }),
-   saveState,
+   (state) => {
+      saveState({
+         navigatePageIndex: state.currentPage - 1,
+         viewControl: state.viewControl,
+      });
+   },
    {
       equalityFn: (prev, next) => {
          return (
