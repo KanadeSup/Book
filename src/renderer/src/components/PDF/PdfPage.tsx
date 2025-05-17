@@ -49,8 +49,6 @@ export function PdfPage(props: PdfPageProps) {
             viewport: viewport,
          });
          await renderTask.promise;
-         // textLayerDiv.style.width = `${viewport.width}px`;
-         // textLayerDiv.style.height = `${viewport.height}px`;
          const textLayer = new TextLayer({
             textContentSource: await pageProxy.getTextContent(),
             container: textLayerDiv,
