@@ -62,9 +62,9 @@ export function PdfViewer() {
          (viewControl.pageLayout === "double-page" ||
             viewControl.pageLayout === "cover-facing-page")
       ) {
-         const pageWidthIncludeBorder =
-            originalDimension.width * 2 + pageBorderSize * 2;
-         const scaleValue = viewDimension.width / pageWidthIncludeBorder;
+         const availableWidth = viewDimension.width - pageBorderSize * 4;
+         const availablePageWidth = availableWidth / 2 - 5;
+         const scaleValue = availablePageWidth / originalDimension.width;
          setItemSize(originalDimension.height * scaleValue);
          setPdfState({
             currentScale: {
