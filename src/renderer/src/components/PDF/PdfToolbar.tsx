@@ -30,14 +30,13 @@ export function PdfToolbar(props: PdfToolbarProps) {
    const { setSideBarVisible, sideBarVisible } = useContext(
       BookViewerLayoutContext,
    );
-   const { pageScrollContainer } = usePdfStore(
+   const { navigateToPage } = usePdfStore(
       useShallow((state) => ({
-         pageScrollContainer: state.pageScrollContainer,
+         navigateToPage: state.navigateToPage,
       })),
    );
    const handlePageNumberChange = (pageNumber: number) => {
-      if (!pageScrollContainer) return;
-      pageScrollContainer.scrollToItem(pageNumber - 1, "start");
+      navigateToPage(pageNumber - 1);
    };
    return (
       <div
