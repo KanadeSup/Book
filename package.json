@@ -23,6 +23,7 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^4.0.0",
+    "@google/genai": "^0.14.1",
     "@radix-ui/react-aspect-ratio": "^1.1.6",
     "@radix-ui/react-context-menu": "^2.2.12",
     "@radix-ui/react-dialog": "^1.1.11",
@@ -53,6 +54,7 @@
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
     "@electron-toolkit/eslint-config-ts": "^3.0.0",
     "@electron-toolkit/tsconfig": "^1.0.1",
+    "@tailwindcss/typography": "^0.5.16",
     "@tanstack/router-plugin": "^1.117.0",
     "@types/node": "^22.14.1",
     "@types/react": "^19.1.1",
