@@ -33,14 +33,14 @@ export function PdfToolbar(props: PdfToolbarProps) {
    return (
       <div
          className={cn(
-            "flex justify-between items-center bg-sidebar border-b border-accent px-2 py-1",
+            "grid grid-cols-3 items-center w-full bg-sidebar border-b border-accent px-2 py-1",
             props.className,
          )}
       >
          {/* Left section */}
          <div className="flex items-center gap-1">
             <IconButton
-               className="w-8 h-8 hover:bg-black/30"
+               className="w-8 h-8 hover:bg-accent"
                onClick={() => setSideBarVisible(!sideBarVisible)}
             >
                <Sidebar className="w-4 h-4" />
@@ -50,11 +50,11 @@ export function PdfToolbar(props: PdfToolbarProps) {
             <CurrentPageNumber />
          </div>
          {/* Center section */}
-         <div className="flex items-center gap-2">
+         <div className="flex items-center gap-2 justify-self-center">
             <SizeSelector />
          </div>
          {/* Right section */}
-         <div className="flex items-center gap-2"></div>
+         <div className="flex items-center gap-2 justify-self-end"></div>
       </div>
    );
 }
@@ -203,7 +203,7 @@ function ViewControl() {
       <div>
          <Popover>
             <PopoverTrigger>
-               <IconButton className="hover:bg-black/30">
+               <IconButton className="hover:bg-accent">
                   <Eye className="w-4 h-4" />
                </IconButton>
             </PopoverTrigger>
