@@ -292,24 +292,28 @@ const CurrentPageNumber = (props: CurrentPageNumberProps) => {
    const currentPageNumber = usePdfStore((state) => state.state.currentPage);
    const numPages = usePdfStore((state) => state.state.numPages);
    const inputRef = useRef<HTMLInputElement>(null);
-   const [pageNumber, setPageNumber] = useState(currentPageNumber);
+   const [pageNumberInput, setPageNumberInput] = useState(
+      currentPageNumber.toString(),
+   );
    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       if (value === "") {
+         setPageNumberInput("");
          return;
       }
-      if (isNaN(parseInt(value))) {
+      const inputPageNumber = parseInt(value);
+      if (isNaN(inputPageNumber)) {
+         setPageNumberInput(value);
          return;
       }
-      const pageNumber = parseInt(value);
-      let updatePageNumber = pageNumber;
-      if (pageNumber > numPages) {
+      let updatePageNumber = inputPageNumber;
+      if (inputPageNumber > numPages) {
          updatePageNumber = numPages;
       }
-      if (pageNumber < 1) {
+      if (inputPageNumber < 1) {
          updatePageNumber = 1;
       }
-      setPageNumber(updatePageNumber);
+      setPageNumberInput(updatePageNumber.toString());
    };
    const handleFocus = () => {
       setTimeout(() => {
@@ -318,30 +322,47 @@ const CurrentPageNumber = (props: CurrentPageNumberProps) => {
          inputRef.current.setSelectionRange(value.length, value.length);
       }, 0);
    };
-   const handleBlur = () => {
-      props.onChange?.(pageNumber);
-   };
    useEffect(() => {
-      setPageNumber(currentPageNumber);
+      setPageNumberInput(currentPageNumber.toString());
    }, [currentPageNumber]);
    return (
       <div className="flex items-center gap-1 text-sm" onFocus={handleFocus}>
          <input
             ref={inputRef}
             className="py-[2px] px-2 hover:bg-accent rounded w-12 text-right border border-gray-600"
-            value={pageNumber}
+            value={pageNumberInput}
             onChange={handleInputChange}
             onKeyDown={(e) => {
                if (e.key === "Enter") {
+                  const updatePageNumber = parseInt(pageNumberInput);
+                  if (isNaN(updatePageNumber)) {
+                     return;
+                  }
+                  props.onChange?.(updatePageNumber);
+                  return;
+               }
+               if (!isValidKey(e.key)) {
                   e.preventDefault();
-                  handleBlur();
                }
             }}
-            onBlur={handleBlur}
             onFocus={handleFocus}
+            onBlur={() => setPageNumberInput(currentPageNumber.toString())}
          />
          <span className="text-gray-200">/</span>
          <div className="">{numPages}</div>
       </div>
    );
+};
+
+const isValidKey = (value: string) => {
+   if (value >= "0" && value <= "9") {
+      return true;
+   }
+   if (value === "Backspace" || value === "Delete") {
+      return true;
+   }
+   if (value === "ArrowLeft" || value === "ArrowRight") {
+      return true;
+   }
+   return false;
 };
