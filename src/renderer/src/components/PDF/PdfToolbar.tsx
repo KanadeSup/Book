@@ -21,7 +21,7 @@ import {
 import { useShallow } from "zustand/react/shallow";
 import { Popover, PopoverContent, PopoverTrigger } from "../shadcn/popover";
 import { cn } from "@/utils/tailwindUtils";
-
+import { useRef } from "react";
 export type PdfToolbarProps = {
    className?: string;
 };
@@ -40,6 +40,7 @@ export function PdfToolbar(props: PdfToolbarProps) {
             </IconButton>
             <div className="h-5 w-[1px] bg-gray-600" />
             <ViewControl />
+            <CurrentPageNumber />
          </div>
          {/* Center section */}
          <div className="flex items-center gap-2">
@@ -268,3 +269,53 @@ function ViewControl() {
       </div>
    );
 }
+
+const CurrentPageNumber = () => {
+   const currentPageNumber = usePdfStore((state) => state.state.currentPage);
+   const numPages = usePdfStore((state) => state.state.numPages);
+   const inputRef = useRef<HTMLInputElement>(null);
+   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      if (value === "") {
+         return;
+      }
+      if (isNaN(parseInt(value))) {
+         return;
+      }
+      const pageNumber = parseInt(value);
+      let updatePageNumber = pageNumber;
+      if (pageNumber > numPages) {
+         updatePageNumber = numPages;
+      }
+      if (pageNumber < 1) {
+         updatePageNumber = 1;
+      }
+      usePdfStore.setState((state) => ({
+         ...state,
+         state: {
+            ...state.state,
+            currentPage: updatePageNumber,
+         },
+      }));
+   };
+   const handleFocus = () => {
+      setTimeout(() => {
+         if (!inputRef.current) return;
+         const value = inputRef.current.value;
+         inputRef.current.setSelectionRange(value.length, value.length);
+      }, 0);
+   };
+   return (
+      <div className="flex items-center gap-1 text-sm" onFocus={handleFocus}>
+         <input
+            ref={inputRef}
+            className="py-[2px] px-2 hover:bg-accent rounded w-12 text-right border border-gray-600"
+            value={currentPageNumber}
+            onChange={handleInputChange}
+            onFocus={handleFocus}
+         />
+         <span className="text-gray-200">/</span>
+         <div className="">{numPages}</div>
+      </div>
+   );
+};
