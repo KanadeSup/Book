@@ -205,7 +205,7 @@ export function PdfViewer() {
 
    return (
       <div
-         className="pdfViewer w-full h-screen box-content"
+         className="pdfViewer w-full h-screen"
          ref={viewContainerRef}
          style={{ "--scale-factor": scale } as React.CSSProperties}
          onWheel={handleWheel}
