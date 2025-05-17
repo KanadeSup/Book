@@ -109,6 +109,23 @@ export function PdfViewer() {
       });
    }, [documentProxy, originalDimension]);
 
+   // Setup resize observer to update view dimension
+   useEffect(() => {
+      const viewContainer = viewContainerRef.current;
+      if (!viewContainer) return;
+      const resizeObserver = new ResizeObserver(() => {
+         throttleSetViewDimension(viewContainer);
+      });
+      resizeObserver.observe(viewContainer);
+      return () => resizeObserver.disconnect();
+   }, []);
+
+   const throttleSetViewDimension = throttle((viewContainer: HTMLDivElement) => {
+      setViewDimension({
+         width: viewContainer.offsetWidth,
+         height: viewContainer.offsetHeight,
+      });
+   }, 200);
    const PageRow = ({ index, style }) => {
       if (!originalDimension) return null;
       const defaultWidth = originalDimension.width * scale;
