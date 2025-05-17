@@ -30,7 +30,7 @@ export function PdfOutlineSidebar() {
                Book Outline
             </h1>
          </div>
-         <ScrollArea className="flex flex-col gap-2 mt-5 px-2 overflow-auto">
+         <ScrollArea className="flex flex-col gap-2 mt-5 px-2 overflow-auto h-full">
             {outlines.map((outline) => (
                <OutlineItem key={outline.title} outline={outline} />
             ))}

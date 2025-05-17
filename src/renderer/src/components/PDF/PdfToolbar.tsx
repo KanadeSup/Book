@@ -21,11 +21,15 @@ import {
 import { useShallow } from "zustand/react/shallow";
 import { Popover, PopoverContent, PopoverTrigger } from "../shadcn/popover";
 import { cn } from "@/utils/tailwindUtils";
-import { useRef } from "react";
+import { useRef, useContext } from "react";
+import { BookViewerLayoutContext } from "@/routes/books/$bookId";
 export type PdfToolbarProps = {
    className?: string;
 };
 export function PdfToolbar(props: PdfToolbarProps) {
+   const { setSideBarVisible, sideBarVisible } = useContext(
+      BookViewerLayoutContext,
+   );
    return (
       <div
          className={cn(
@@ -35,7 +39,10 @@ export function PdfToolbar(props: PdfToolbarProps) {
       >
          {/* Left section */}
          <div className="flex items-center gap-1">
-            <IconButton className="w-8 h-8 hover:bg-black/30">
+            <IconButton
+               className="w-8 h-8 hover:bg-black/30"
+               onClick={() => setSideBarVisible(!sideBarVisible)}
+            >
                <Sidebar className="w-4 h-4" />
             </IconButton>
             <div className="h-5 w-[1px] bg-gray-600" />

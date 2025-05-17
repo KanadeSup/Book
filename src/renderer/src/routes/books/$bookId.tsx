@@ -2,7 +2,7 @@ import { PdfViewer } from "@/components/PDF/PdfViewer";
 import { pdfjs } from "@/lib/pdfjs";
 import { readFile } from "@/services/fileSystem";
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, createContext, useState } from "react";
 import { useConfigStore } from "@/stores/configStore";
 import { getBooks } from "@/services/book";
 import { SpacePathInvalidError } from "@/lib/errors/spacePathInvalidError";
@@ -10,6 +10,7 @@ import { usePdfStore } from "@/stores/pdfStore";
 import { useShallow } from "zustand/react/shallow";
 import { PdfToolbar } from "@/components/PDF/PdfToolbar";
 import { PdfOutlineSidebar } from "@/components/PDF/PdfOutlineSidebar";
+import { cn } from "@/utils/tailwindUtils";
 export const Route = createFileRoute("/books/$bookId")({
    loader: async ({ params }) => {
       const bookId = params.bookId;
@@ -40,8 +41,18 @@ export const Route = createFileRoute("/books/$bookId")({
    component: BookViewerPage,
 });
 
+type BookViewerLayoutContextType = {
+   sideBarVisible: boolean;
+   setSideBarVisible: (visible: boolean) => void;
+};
+export const BookViewerLayoutContext =
+   createContext<BookViewerLayoutContextType>({
+      sideBarVisible: true,
+      setSideBarVisible: () => {},
+   });
 function BookViewerPage() {
    const { book } = Route.useLoaderData();
+   const [sideBarVisible, setSideBarVisible] = useState(true);
    const { setDocumentProxy, setPdfState } = usePdfStore(
       useShallow((state) => ({
          setDocumentProxy: state.setDocumentProxy,
@@ -66,17 +77,28 @@ function BookViewerPage() {
       loadDocument();
    }, []);
    return (
-      <div className="flex flex-row h-screen">
-         <div className="w-[300px] border-r border-accent">
-            <PdfOutlineSidebar />
-         </div>
-
-         <div className="w-full relative">
-            <div className="absolute top-0 left-0 right-0 z-50">
-               <PdfToolbar />
+      <BookViewerLayoutContext.Provider
+         value={{ sideBarVisible, setSideBarVisible }}
+      >
+         <div className="flex flex-row h-screen">
+            <div
+               className={cn(
+                  "transition-all  overflow-hidden shrink-0",
+                  sideBarVisible ? "w-[300px]" : "w-0",
+               )}
+            >
+               <div className="w-[300px] h-full border-r border-accent">
+                  <PdfOutlineSidebar />
+               </div>
             </div>
-            <PdfViewer />
+
+            <div className="w-full relative">
+               <div className="absolute top-0 left-0 right-0 z-50">
+                  <PdfToolbar />
+               </div>
+               <PdfViewer />
+            </div>
          </div>
-      </div>
+      </BookViewerLayoutContext.Provider>
    );
 }
