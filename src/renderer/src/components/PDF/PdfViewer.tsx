@@ -48,7 +48,6 @@ export function PdfViewer() {
          const pageWidthIncludeBorder =
             originalDimension.width + pageBorderSize * 2;
          const scaleValue = viewDimension.width / pageWidthIncludeBorder;
-         setItemSize(originalDimension.height * scaleValue);
          return scaleValue;
       }
       if (
@@ -59,27 +58,22 @@ export function PdfViewer() {
          const availableWidth = viewDimension.width - pageBorderSize * 4;
          const availablePageWidth = availableWidth / 2 - 5;
          const scaleValue = availablePageWidth / originalDimension.width;
-         setItemSize(originalDimension.height * scaleValue);
          return scaleValue;
       }
       if (currentScale.scaleType === "fit-height") {
          const scaleValue = viewDimension.height / originalDimension.height;
-         setItemSize(originalDimension.height * scaleValue);
          return scaleValue;
       }
       if (currentScale.scaleType === "percentage" && currentScale.scaleValue) {
-         setItemSize(
-            originalDimension.height * (currentScale.scaleValue / 100),
-         );
          return currentScale.scaleValue / 100;
       }
       return 1;
    }, [
       originalDimension,
       viewDimension,
-      currentScale.scaleValue,
       currentScale.scaleType,
       viewControl.pageLayout,
+      currentScale.scaleValue,
    ]);
 
    useEffect(() => {
@@ -92,14 +86,23 @@ export function PdfViewer() {
    }, [documentProxy, originalDimension]);
 
    useEffect(() => {
-      if (scale === currentScale.scaleValue) return;
+      if (!originalDimension) {
+         return;
+      }
+      if (
+         currentScale.scaleValue &&
+         Math.ceil(scale * 100) === Math.ceil(currentScale.scaleValue * 100)
+      ) {
+         return;
+      }
       setPdfState({
          currentScale: {
             scaleType: currentScale.scaleType,
-            scaleValue: scale,
+            scaleValue: Math.round(scale * 100),
          },
       });
-   }, [scale]);
+      setItemSize(originalDimension.height * scale);
+   }, [scale, originalDimension]);
 
    // Setup resize observer to update view dimension
    useEffect(() => {

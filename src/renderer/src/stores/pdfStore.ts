@@ -64,7 +64,6 @@ export const usePdfStore = create<PdfStore>()(
          const bookId = path.split("/")[2];
          if (!bookId) return;
          const state = localStorage.getItem(`PDF_STATE_${bookId}`);
-         console.log(state);
          if (!state) return;
          const parsedState = JSON.parse(state) as SaveState;
          set((currentState) => ({
