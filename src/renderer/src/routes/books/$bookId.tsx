@@ -83,7 +83,7 @@ function BookViewerPage() {
          <div className="flex flex-row h-screen overflow-hidden">
             <div
                className={cn(
-                  "transition-all overflow-hidden shrink-0",
+                  "transition-all overflow-hidden shrink-0 ease-linear duration-200",
                   sideBarVisible ? "w-[300px]" : "w-0",
                )}
             >
