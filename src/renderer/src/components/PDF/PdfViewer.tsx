@@ -49,12 +49,6 @@ export function PdfViewer() {
             originalDimension.width + pageBorderSize * 2;
          const scaleValue = viewDimension.width / pageWidthIncludeBorder;
          setItemSize(originalDimension.height * scaleValue);
-         setPdfState({
-            currentScale: {
-               scaleType: "fit-width",
-               scaleValue: Math.round(scaleValue * 100),
-            },
-         });
          return scaleValue;
       }
       if (
@@ -66,23 +60,11 @@ export function PdfViewer() {
          const availablePageWidth = availableWidth / 2 - 5;
          const scaleValue = availablePageWidth / originalDimension.width;
          setItemSize(originalDimension.height * scaleValue);
-         setPdfState({
-            currentScale: {
-               scaleType: "fit-width",
-               scaleValue: Math.round(scaleValue * 100),
-            },
-         });
          return scaleValue;
       }
       if (currentScale.scaleType === "fit-height") {
          const scaleValue = viewDimension.height / originalDimension.height;
          setItemSize(originalDimension.height * scaleValue);
-         setPdfState({
-            currentScale: {
-               scaleType: "fit-height",
-               scaleValue: Math.round(scaleValue * 100),
-            },
-         });
          return scaleValue;
       }
       if (currentScale.scaleType === "percentage" && currentScale.scaleValue) {
@@ -109,6 +91,16 @@ export function PdfViewer() {
       });
    }, [documentProxy, originalDimension]);
 
+   useEffect(() => {
+      if (scale === currentScale.scaleValue) return;
+      setPdfState({
+         currentScale: {
+            scaleType: currentScale.scaleType,
+            scaleValue: scale,
+         },
+      });
+   }, [scale]);
+
    // Setup resize observer to update view dimension
    useEffect(() => {
       const viewContainer = viewContainerRef.current;
@@ -120,12 +112,15 @@ export function PdfViewer() {
       return () => resizeObserver.disconnect();
    }, []);
 
-   const throttleSetViewDimension = throttle((viewContainer: HTMLDivElement) => {
-      setViewDimension({
-         width: viewContainer.offsetWidth,
-         height: viewContainer.offsetHeight,
-      });
-   }, 200);
+   const throttleSetViewDimension = throttle(
+      (viewContainer: HTMLDivElement) => {
+         setViewDimension({
+            width: viewContainer.offsetWidth,
+            height: viewContainer.offsetHeight,
+         });
+      },
+      200,
+   );
    const PageRow = ({ index, style }) => {
       if (!originalDimension) return null;
       const defaultWidth = originalDimension.width * scale;
