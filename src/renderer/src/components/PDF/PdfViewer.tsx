@@ -18,7 +18,7 @@ export function PdfViewer() {
    const [viewDimension, setViewDimension] = useState<Dimension>();
    const [itemSize, setItemSize] = useState<number>(1);
    const scrollAmountTotal = useRef<number>(0);
-   const [pageBorderSize, setPageBorderSize] = useState<number>(10);
+   const pageBorderSize = 10;
    const {
       documentProxy,
       numPages,
