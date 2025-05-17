@@ -78,6 +78,7 @@ export const usePdfStore = create<PdfStore>()(
 type SaveState = {
    navigatePageIndex: number | null;
    viewControl: PdfStore["state"]["viewControl"];
+   currentScale: PdfStore["state"]["currentScale"];
 };
 const saveState = debounce((state: SaveState) => {
    const path = window.location.pathname;
@@ -98,6 +99,7 @@ usePdfStore.subscribe(
       saveState({
          navigatePageIndex: state.currentPage - 1,
          viewControl: state.viewControl,
+         currentScale: state.currentScale,
       });
    },
    {
