@@ -7,6 +7,7 @@ import { usePdfStore } from "@/stores/pdfStore";
 import { useShallow } from "zustand/react/shallow";
 import throttle from "lodash/throttle";
 import "@/assets/styles/scrolbar.css";
+import { TextSelectionActionBar } from "../TextSelectionActionBar/TextSelectionActionBar";
 export type PdfViewerProps = {};
 
 type Dimension = {
@@ -19,6 +20,14 @@ export function PdfViewer() {
    const [itemSize, setItemSize] = useState<number>(1);
    const scrollAmountTotal = useRef<number>(0);
    const contentScrollContainerRef = useRef<FixedSizeList<any>>(null);
+   const textSelectionActionBarRef = useRef<{
+      setOpen: (
+         open: boolean,
+         position?: { x: number; y: number },
+         selectedText?: string,
+      ) => void;
+      isOpen: boolean;
+   }>(null);
    const pageBorderSize = 10;
    const {
       documentProxy,
@@ -247,6 +256,7 @@ export function PdfViewer() {
       setPdfState({
          currentPage,
       });
+      textSelectionActionBarRef.current?.setOpen(false);
    }, 100);
 
    const fixedListItemCount = useMemo(() => {
@@ -261,12 +271,38 @@ export function PdfViewer() {
       }
       return numPages;
    }, [numPages, viewControl.pageLayout]);
+
+   const handleSelectionChange = (event: React.MouseEvent<HTMLDivElement>) => {
+      const selection = window.getSelection();
+      if (!selection) {
+         textSelectionActionBarRef.current?.setOpen(false);
+         return;
+      }
+      const selectedText = selection.toString();
+      if (selectedText.length === 0) {
+         textSelectionActionBarRef.current?.setOpen(false);
+         return;
+      }
+      if (textSelectionActionBarRef.current?.isOpen) {
+         return;
+      }
+      const actionBarPosition = {
+         x: event.clientX + 10,
+         y: event.clientY + 10,
+      };
+      textSelectionActionBarRef.current?.setOpen(
+         true,
+         actionBarPosition,
+         selectedText,
+      );
+   };
    return (
       <div
          className="pdfViewer w-full h-screen flex"
          ref={viewContainerRef}
          style={{ "--scale-factor": scale } as React.CSSProperties}
          onWheel={handleWheel}
+         onMouseUp={handleSelectionChange}
       >
          <AutoSizer disableWidth={true} className="w-full">
             {({ height }) => {
@@ -289,6 +325,7 @@ export function PdfViewer() {
                );
             }}
          </AutoSizer>
+         <TextSelectionActionBar ref={textSelectionActionBarRef} />
       </div>
    );
 }

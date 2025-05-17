@@ -82,7 +82,7 @@ function BookViewerPage() {
       <BookViewerLayoutContext.Provider
          value={{ sideBarVisible, setSideBarVisible }}
       >
-         <div className="flex flex-row h-screen overflow-hidden">
+         <div className="flex flex-row h-screen overflow-hidden relative">
             <div
                className={cn(
                   "transition-all overflow-hidden shrink-0 ease-linear duration-200",
