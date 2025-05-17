@@ -10,10 +10,11 @@ import { ScrollArea } from "../shadcn/scroll-area";
 import { PDFDocumentProxy } from "pdfjs-dist";
 
 export function PdfOutlineSidebar() {
-   const { documentProxy, pageScrollContainer } = usePdfStore(
+   const { documentProxy, pageScrollContainer, viewControl } = usePdfStore(
       useShallow((state) => ({
          documentProxy: state.documentProxy,
          pageScrollContainer: state.pageScrollContainer,
+         viewControl: state.state.viewControl,
       })),
    );
    const [outlines, setOutlines] = useState<PdfOutline[]>([]);
@@ -27,7 +28,20 @@ export function PdfOutlineSidebar() {
    }, [documentProxy]);
    const handleOutlineClick = (pageIndex: number) => {
       if (!pageScrollContainer) return;
-      pageScrollContainer.scrollToItem(pageIndex, "start");
+      if (viewControl.pageLayout === "single-page") {
+         pageScrollContainer.scrollToItem(pageIndex, "start");
+         return;
+      }
+      if (viewControl.pageLayout === "double-page") {
+         const navigateItem = Math.floor(pageIndex / 2);
+         pageScrollContainer.scrollToItem(navigateItem, "start");
+         return;
+      }
+      if (viewControl.pageLayout === "cover-facing-page") {
+         const navigateItem = pageIndex === 0 ? 0 : Math.ceil(pageIndex / 2);
+         pageScrollContainer.scrollToItem(navigateItem, "start");
+         return;
+      }
    };
    return (
       <div className="h-full w-full bg-sidebar flex flex-col">
