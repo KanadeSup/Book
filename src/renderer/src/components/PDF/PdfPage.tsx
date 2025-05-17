@@ -26,6 +26,7 @@ export function PdfPage(props: PdfPageProps) {
       if (!documentProxy || !canvas || !textLayerDiv || !pageDiv) return;
 
       let renderTask: RenderTask | null = null;
+      let textLayer: TextLayer | null = null;
       let cancelled = false;
 
       const renderPage = async function () {
@@ -50,17 +51,19 @@ export function PdfPage(props: PdfPageProps) {
             viewport: viewport,
          });
          await renderTask.promise;
-         const textLayer = new TextLayer({
+         if (cancelled) return;
+         textLayer = new TextLayer({
             textContentSource: await pageProxy.getTextContent(),
             container: textLayerDiv,
             viewport: viewport,
          });
-         textLayer.render();
+         await textLayer.render();
       };
       renderPage();
       return () => {
          cancelled = true;
          renderTask?.cancel();
+         textLayer?.cancel();
       };
    }, [documentProxy]);
 
