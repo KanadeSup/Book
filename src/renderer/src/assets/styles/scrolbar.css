@@ -1,0 +1,18 @@
+.dark-lean-scrollbar {
+   &::-webkit-scrollbar-track {
+     box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+     -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+     background-color: black;
+   }
+ 
+   &::-webkit-scrollbar {
+     width: 10px;
+     background-color: white;
+   }
+ 
+   &::-webkit-scrollbar-thumb {
+     background-color: #9292926b;
+     cursor: pointer;
+     height: 50px;
+   }
+ }

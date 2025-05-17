@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { usePdfStore } from "@/stores/pdfStore";
 import { useShallow } from "zustand/react/shallow";
 import throttle from "lodash/throttle";
-
+import "@/assets/styles/scrolbar.css";
 export type PdfViewerProps = {};
 
 type Dimension = {
@@ -247,6 +247,7 @@ export function PdfViewer() {
                         setPageScrollContainer(fixedSizeList);
                      }}
                      height={height}
+                     className="dark-lean-scrollbar"
                      width="100%"
                      itemCount={fixedListItemCount}
                      itemSize={itemSize + pageBorderSize * 2}
