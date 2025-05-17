@@ -21,7 +21,7 @@ import {
 import { useShallow } from "zustand/react/shallow";
 import { Popover, PopoverContent, PopoverTrigger } from "../shadcn/popover";
 import { cn } from "@/utils/tailwindUtils";
-import { useRef, useContext } from "react";
+import { useRef, useContext, useState, useEffect } from "react";
 import { BookViewerLayoutContext } from "@/routes/books/$bookId";
 export type PdfToolbarProps = {
    className?: string;
@@ -30,6 +30,15 @@ export function PdfToolbar(props: PdfToolbarProps) {
    const { setSideBarVisible, sideBarVisible } = useContext(
       BookViewerLayoutContext,
    );
+   const { pageScrollContainer } = usePdfStore(
+      useShallow((state) => ({
+         pageScrollContainer: state.pageScrollContainer,
+      })),
+   );
+   const handlePageNumberChange = (pageNumber: number) => {
+      if (!pageScrollContainer) return;
+      pageScrollContainer.scrollToItem(pageNumber - 1, "start");
+   };
    return (
       <div
          className={cn(
@@ -47,7 +56,7 @@ export function PdfToolbar(props: PdfToolbarProps) {
             </IconButton>
             <div className="h-5 w-[1px] bg-gray-600" />
             <ViewControl />
-            <CurrentPageNumber />
+            <CurrentPageNumber onChange={handlePageNumberChange} />
          </div>
          {/* Center section */}
          <div className="flex items-center gap-2 justify-self-center">
@@ -277,10 +286,14 @@ function ViewControl() {
    );
 }
 
-const CurrentPageNumber = () => {
+type CurrentPageNumberProps = {
+   onChange?: (pageNumber: number) => void;
+};
+const CurrentPageNumber = (props: CurrentPageNumberProps) => {
    const currentPageNumber = usePdfStore((state) => state.state.currentPage);
    const numPages = usePdfStore((state) => state.state.numPages);
    const inputRef = useRef<HTMLInputElement>(null);
+   const [pageNumber, setPageNumber] = useState(currentPageNumber);
    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
       if (value === "") {
@@ -297,13 +310,7 @@ const CurrentPageNumber = () => {
       if (pageNumber < 1) {
          updatePageNumber = 1;
       }
-      usePdfStore.setState((state) => ({
-         ...state,
-         state: {
-            ...state.state,
-            currentPage: updatePageNumber,
-         },
-      }));
+      setPageNumber(updatePageNumber);
    };
    const handleFocus = () => {
       setTimeout(() => {
@@ -312,13 +319,26 @@ const CurrentPageNumber = () => {
          inputRef.current.setSelectionRange(value.length, value.length);
       }, 0);
    };
+   const handleBlur = () => {
+      props.onChange?.(pageNumber);
+   };
+   useEffect(() => {
+      setPageNumber(currentPageNumber);
+   }, [currentPageNumber]);
    return (
       <div className="flex items-center gap-1 text-sm" onFocus={handleFocus}>
          <input
             ref={inputRef}
             className="py-[2px] px-2 hover:bg-accent rounded w-12 text-right border border-gray-600"
-            value={currentPageNumber}
+            value={pageNumber}
             onChange={handleInputChange}
+            onKeyDown={(e) => {
+               if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleBlur();
+               }
+            }}
+            onBlur={handleBlur}
             onFocus={handleFocus}
          />
          <span className="text-gray-200">/</span>
