@@ -25,6 +25,7 @@ export function PdfViewer() {
       originalDimension,
       currentScale,
       setPdfState,
+      setPageScrollContainer,
       viewControl,
    } = usePdfStore(
       useShallow((state) => ({
@@ -34,6 +35,7 @@ export function PdfViewer() {
          currentScale: state.state.currentScale,
          setPdfState: state.setPdfState,
          viewControl: state.state.viewControl,
+         setPageScrollContainer: state.setPageScrollContainer,
       })),
    );
 
@@ -240,6 +242,10 @@ export function PdfViewer() {
                }
                return (
                   <FixedSizeList
+                     ref={(fixedSizeList) => {
+                        if (!fixedSizeList) return;
+                        setPageScrollContainer(fixedSizeList);
+                     }}
                      height={height}
                      width={width}
                      itemCount={fixedListItemCount}

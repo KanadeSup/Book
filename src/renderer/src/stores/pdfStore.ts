@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { PDFDocumentProxy } from "pdfjs-dist";
+import { FixedSizeList } from "react-window";
 
 export type PageTransitionView = "continuous-page" | "page-by-page";
 export type PageLayoutView =
@@ -10,6 +11,7 @@ export type PageLayoutView =
 export type PdfStore = {
    documentProxy: PDFDocumentProxy | null;
    setDocumentProxy: (documentProxy: PDFDocumentProxy) => void;
+   pageScrollContainer: FixedSizeList<any> | null;
    state: {
       numPages: number;
       currentPage: number;
@@ -27,9 +29,11 @@ export type PdfStore = {
       };
    };
    setPdfState: (state: Partial<PdfStore["state"]>) => void;
+   setPageScrollContainer: (pageScrollContainer: FixedSizeList<any>) => void;
 };
 export const usePdfStore = create<PdfStore>((set) => ({
    documentProxy: null,
+   pageScrollContainer: null,
    state: {
       numPages: 0,
       currentPage: 1,
@@ -45,4 +49,6 @@ export const usePdfStore = create<PdfStore>((set) => ({
    setPdfState: (state) => {
       set((currentState) => ({ state: { ...currentState.state, ...state } }));
    },
+   setPageScrollContainer: (pageScrollContainer) =>
+      set({ pageScrollContainer }),
 }));
