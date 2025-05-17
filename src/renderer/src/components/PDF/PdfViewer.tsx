@@ -229,13 +229,13 @@ export function PdfViewer() {
    }, [numPages, viewControl.pageLayout]);
    return (
       <div
-         className="pdfViewer w-full h-screen"
+         className="pdfViewer w-full h-screen flex"
          ref={viewContainerRef}
          style={{ "--scale-factor": scale } as React.CSSProperties}
          onWheel={handleWheel}
       >
-         <AutoSizer>
-            {({ height, width }) => {
+         <AutoSizer disableWidth={true} className="w-full">
+            {({ height }) => {
                // If Everything is not set which means the setup is not finished, return empty div
                if (!documentProxy || !originalDimension || !viewDimension) {
                   return <div></div>;
@@ -247,7 +247,7 @@ export function PdfViewer() {
                         setPageScrollContainer(fixedSizeList);
                      }}
                      height={height}
-                     width={width}
+                     width="100%"
                      itemCount={fixedListItemCount}
                      itemSize={itemSize + pageBorderSize * 2}
                      onScroll={handleScroll}
