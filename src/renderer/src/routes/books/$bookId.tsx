@@ -53,10 +53,11 @@ export const BookViewerLayoutContext =
 function BookViewerPage() {
    const { book } = Route.useLoaderData();
    const [sideBarVisible, setSideBarVisible] = useState(true);
-   const { setDocumentProxy, setPdfState } = usePdfStore(
+   const { setDocumentProxy, setPdfState, loadSavedState } = usePdfStore(
       useShallow((state) => ({
          setDocumentProxy: state.setDocumentProxy,
          setPdfState: state.setPdfState,
+         loadSavedState: state.loadSavedState,
       })),
    );
    useEffect(() => {
@@ -75,6 +76,7 @@ function BookViewerPage() {
          setDocumentProxy(proxy);
       }
       loadDocument();
+      loadSavedState();
    }, []);
    return (
       <BookViewerLayoutContext.Provider
