@@ -5,7 +5,7 @@ import AutoSizer from "react-virtualized-auto-sizer";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePdfStore } from "@/stores/pdfStore";
 import { useShallow } from "zustand/react/shallow";
-import throttle from 'lodash/throttle';
+import throttle from "lodash/throttle";
 
 export type PdfViewerProps = {};
 
@@ -43,8 +43,10 @@ export function PdfViewer() {
          currentScale.scaleType === "fit-width" &&
          viewControl.pageLayout === "single-page"
       ) {
-         const scaleValue = viewDimension.width / originalDimension.width;
-         setItemSize(originalDimension.width * scaleValue);
+         const pageWidthIncludeBorder =
+            originalDimension.width + pageBorderSize * 2;
+         const scaleValue = viewDimension.width / pageWidthIncludeBorder;
+         setItemSize(originalDimension.height * scaleValue);
          setPdfState({
             currentScale: {
                scaleType: "fit-width",
