@@ -213,6 +213,18 @@ export function PdfViewer() {
       });
    }, 100);
 
+   const fixedListItemCount = useMemo(() => {
+      if (viewControl.pageLayout === "single-page") {
+         return numPages;
+      }
+      if (
+         viewControl.pageLayout === "double-page" ||
+         viewControl.pageLayout === "cover-facing-page"
+      ) {
+         return Math.ceil(numPages / 2);
+      }
+      return numPages;
+   }, [numPages, viewControl.pageLayout]);
    return (
       <div
          className="pdfViewer w-full h-screen"
@@ -230,7 +242,7 @@ export function PdfViewer() {
                   <FixedSizeList
                      height={height}
                      width={width}
-                     itemCount={numPages}
+                     itemCount={fixedListItemCount}
                      itemSize={itemSize + pageBorderSize * 2}
                      onScroll={handleScroll}
                   >
