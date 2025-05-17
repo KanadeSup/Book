@@ -7,6 +7,8 @@ export type PdfPageProps = {
    pageNumber: number;
    scale?: number;
    borderSize?: number;
+   defaultWidth?: number;
+   defaultHeight?: number;
 };
 export function PdfPage(props: PdfPageProps) {
    const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -21,8 +23,7 @@ export function PdfPage(props: PdfPageProps) {
       const canvas = canvasRef.current;
       const textLayerDiv = textLayerRef.current;
       const pageDiv = pageRef.current;
-      if (!documentProxy || !canvas || !textLayerDiv || !pageDiv)
-         return;
+      if (!documentProxy || !canvas || !textLayerDiv || !pageDiv) return;
 
       let renderTask: RenderTask | null = null;
       let cancelled = false;
@@ -64,14 +65,19 @@ export function PdfPage(props: PdfPageProps) {
    }, [documentProxy]);
 
    return (
-      <div ref={pageRef} className="page m-0! box-content" style={{border: `${props.borderSize ?? 0}px solid transparent`}}>
+      <div
+         ref={pageRef}
+         className="page m-0! box-content"
+         style={{
+            border: `${props.borderSize ?? 0}px solid transparent`,
+            width: props.defaultWidth ? props.defaultWidth : "auto",
+            height: props.defaultHeight ? props.defaultHeight : "auto",
+         }}
+      >
          <div className="canvasWrapper">
             <canvas ref={canvasRef}></canvas>
          </div>
-         <div
-            ref={textLayerRef}
-            className="textLayer"
-         ></div>
+         <div ref={textLayerRef} className="textLayer"></div>
       </div>
    );
 }

@@ -110,10 +110,18 @@ export function PdfViewer() {
    }, [documentProxy, originalDimension]);
 
    const PageRow = ({ index, style }) => {
+      if (!originalDimension) return null;
+      const defaultWidth = originalDimension.width * scale;
+      const defaultHeight = originalDimension.height * scale;
       if (viewControl.pageLayout === "single-page") {
          return (
             <div style={style} className="flex justify-center">
-               <PdfPage pageNumber={index + 1} scale={scale} />
+               <PdfPage
+                  pageNumber={index + 1}
+                  scale={scale}
+                  defaultWidth={defaultWidth}
+                  defaultHeight={defaultHeight}
+               />
             </div>
          );
       }
