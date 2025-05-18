@@ -9,4 +9,6 @@ export type PdfOutline = {
    newWindow: boolean | undefined;
    count: number | undefined;
    items: PdfOutline[];
+   resolvedPageNumber?: number;
+   resolvedEndPageNumber?: number;
 };

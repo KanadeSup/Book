@@ -10,18 +10,26 @@ import { ScrollArea } from "../shadcn/scroll-area";
 import { PDFDocumentProxy } from "pdfjs-dist";
 
 export function PdfOutlineSidebar() {
-   const { documentProxy, viewControl, navigateToPage } = usePdfStore(
-      useShallow((state) => ({
-         documentProxy: state.documentProxy,
-         viewControl: state.state.viewControl,
-         navigateToPage: state.navigateToPage,
-      })),
-   );
+   const { documentProxy, viewControl, navigateToPage, currentPage } =
+      usePdfStore(
+         useShallow((state) => ({
+            documentProxy: state.documentProxy,
+            viewControl: state.state.viewControl,
+            navigateToPage: state.navigateToPage,
+            currentPage: state.state.currentPage,
+         })),
+      );
    const [outlines, setOutlines] = useState<PdfOutline[]>([]);
    useEffect(() => {
       if (!documentProxy) return;
       const loadOutline = async () => {
          const documentOutlines = await documentProxy.getOutline();
+         await resolvePageNumberOutlines(documentOutlines, documentProxy);
+         await resolveEndPageNumberOutlines(
+            documentOutlines,
+            documentProxy,
+            documentProxy.numPages,
+         );
          setOutlines(documentOutlines);
       };
       loadOutline();
@@ -56,6 +64,7 @@ export function PdfOutlineSidebar() {
                   outline={outline}
                   documentProxy={documentProxy}
                   onClick={handleOutlineClick}
+                  currentPage={currentPage}
                />
             ))}
          </ScrollArea>
@@ -68,19 +77,21 @@ type OutlineItemProps = {
    level?: number;
    documentProxy: PDFDocumentProxy | null;
    onClick?: (pageIndex: number) => void;
+   currentPage: number;
 };
 const OutlineItem = (props: OutlineItemProps) => {
    const [open, setOpen] = useState(false);
    const indentLevel = props.level ? props.level : 0;
    const handleClick = async () => {
-      if (!props.documentProxy || !props.outline.dest) return;
-      const pageIndex = await covertOutlineDestinationToPageIndex(
-         props.outline.dest,
-         props.documentProxy,
-      );
-      if (pageIndex === null) return;
-      props.onClick?.(pageIndex);
+      if (!props.documentProxy || !props.outline.resolvedPageNumber) return;
+      const navigateIndex = props.outline.resolvedPageNumber - 1;
+      props.onClick?.(navigateIndex);
    };
+   const isCurrentPage =
+      props.outline.resolvedEndPageNumber &&
+      props.outline.resolvedPageNumber &&
+      props.currentPage >= props.outline.resolvedPageNumber &&
+      props.currentPage <= props.outline.resolvedEndPageNumber;
    return (
       <div
          style={{ paddingLeft: `${indentLevel * 20}px` }}
@@ -100,7 +111,12 @@ const OutlineItem = (props: OutlineItemProps) => {
                      className="hover:bg-accent cursor-pointer p-1 px-2 rounded-md w-full"
                      onClick={handleClick}
                   >
-                     <h1 className="text-gray-300 font-bold text-left ">
+                     <h1
+                        className={cn(
+                           "text-gray-300 font-bold text-left",
+                           isCurrentPage ? "text-[#FF7551]" : "",
+                        )}
+                     >
                         {props.outline.title}
                      </h1>
                   </div>
@@ -114,6 +130,7 @@ const OutlineItem = (props: OutlineItemProps) => {
                         level={1}
                         documentProxy={props.documentProxy}
                         onClick={props.onClick}
+                        currentPage={props.currentPage}
                      />
                   ))}
                </ExpanderContent>
@@ -123,7 +140,12 @@ const OutlineItem = (props: OutlineItemProps) => {
                className="hover:bg-accent cursor-pointer p-1 px-2 rounded-md w-full transition-all"
                onClick={handleClick}
             >
-               <h1 className="text-gray-300 font-bold text-left ">
+               <h1
+                  className={cn(
+                     "text-gray-300 font-bold text-left",
+                     isCurrentPage ? "text-[#FF7551]" : "",
+                  )}
+               >
                   {props.outline.title}
                </h1>
             </div>
@@ -153,5 +175,56 @@ const covertOutlineDestinationToPageIndex = async (
          `Error converting outline destination to page index: ${error}`,
       );
       return null;
+   }
+};
+
+// Resolve the destination of outlines to get the page number of the outline
+const resolvePageNumberOutlines = async (
+   outlines: PdfOutline[],
+   documentProxy: PDFDocumentProxy,
+) => {
+   for (const outline of outlines) {
+      if (outline.items.length > 0) {
+         await resolvePageNumberOutlines(outline.items, documentProxy);
+      }
+      if (!outline.dest) continue;
+      const pageIndex = await covertOutlineDestinationToPageIndex(
+         outline.dest,
+         documentProxy,
+      );
+      if (pageIndex === null) continue;
+      outline.resolvedPageNumber = pageIndex + 1;
+   }
+};
+
+const resolveEndPageNumberOutlines = async (
+   outlines: PdfOutline[],
+   documentProxy: PDFDocumentProxy,
+   maxPageNumber: number | null,
+) => {
+   const lastOutline = outlines[outlines.length - 1];
+   if (maxPageNumber) {
+      lastOutline.resolvedEndPageNumber =
+         lastOutline.resolvedPageNumber === maxPageNumber
+            ? maxPageNumber
+            : maxPageNumber - 1;
+   }
+   for (let i = 0; i < outlines.length - 1; i++) {
+      const outline = outlines[i];
+      if (!outline.dest) continue;
+      const nextOutline = outlines[i + 1];
+      if (outline.items.length > 0) {
+         await resolveEndPageNumberOutlines(
+            outline.items,
+            documentProxy,
+            nextOutline.resolvedPageNumber ?? null,
+         );
+      }
+      if (!nextOutline.resolvedPageNumber) continue;
+      if (nextOutline.resolvedPageNumber === outline.resolvedPageNumber) {
+         outline.resolvedEndPageNumber = nextOutline.resolvedPageNumber;
+      } else {
+         outline.resolvedEndPageNumber = nextOutline.resolvedPageNumber - 1;
+      }
    }
 };
