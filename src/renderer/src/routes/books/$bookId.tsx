@@ -11,6 +11,7 @@ import { useShallow } from "zustand/react/shallow";
 import { PdfToolbar } from "@/components/PDF/PdfToolbar";
 import { PdfOutlineSidebar } from "@/components/PDF/PdfOutlineSidebar";
 import { cn } from "@/utils/tailwindUtils";
+import { BookChatModal } from "@/components/MyModal/BookChatModal";
 export const Route = createFileRoute("/books/$bookId")({
    loader: async ({ params }) => {
       const bookId = params.bookId;
@@ -101,6 +102,7 @@ function BookViewerPage() {
                <PdfViewer />
             </div>
          </div>
+         <BookChatModal open={false} onClose={() => {}} />
       </BookViewerLayoutContext.Provider>
    );
 }
