@@ -13,30 +13,21 @@ import {
    SelectItem,
    SelectTrigger,
 } from "../shadcn/select";
-import {
-   PageLayoutView,
-   PageTransitionView,
-   usePdfStore,
-} from "@/stores/pdfStore";
 import { useShallow } from "zustand/react/shallow";
 import { Popover, PopoverContent, PopoverTrigger } from "../shadcn/popover";
 import { cn } from "@/utils/tailwindUtils";
-import { useRef, useContext, useState, useEffect } from "react";
-import { BookViewerLayoutContext } from "@/routes/books/$bookId";
+import { useRef, useState, useEffect } from "react";
+import { usePDFStore, usePDFStoreActions } from "./PDFProvider";
+import { PDFPageLayout, PDFPageScaleType, PDFPageTransition } from "@/types/pdf.types";
+import { usePDFReaderStoreActions } from "./PDFReaderProvider";
 export type PdfToolbarProps = {
    className?: string;
 };
-export function PdfToolbar(props: PdfToolbarProps) {
-   const { setSideBarVisible, sideBarVisible } = useContext(
-      BookViewerLayoutContext,
-   );
-   const { navigateToPage } = usePdfStore(
-      useShallow((state) => ({
-         navigateToPage: state.navigateToPage,
-      })),
-   );
+export function PDFToolbar(props: PdfToolbarProps) {
+   const { scrollToPage } = usePDFStoreActions();
+   const { toggleSidebarVisibility } = usePDFReaderStoreActions();
    const handlePageNumberChange = (pageNumber: number) => {
-      navigateToPage(pageNumber - 1);
+      scrollToPage(pageNumber);
    };
    return (
       <div
@@ -49,33 +40,44 @@ export function PdfToolbar(props: PdfToolbarProps) {
          <div className="flex items-center gap-1">
             <IconButton
                className="w-8 h-8 hover:bg-accent"
-               onClick={() => setSideBarVisible(!sideBarVisible)}
+               onClick={() => toggleSidebarVisibility()}
             >
                <Sidebar className="w-4 h-4" />
             </IconButton>
             <div className="h-5 w-[1px] bg-gray-600" />
             <ViewControl />
-            <CurrentPageNumber onChange={handlePageNumberChange} />
+            <CurrentPageNumber onSubmit={handlePageNumberChange} />
          </div>
+
          {/* Center section */}
          <div className="flex items-center gap-2 justify-self-center">
             <SizeSelector />
          </div>
+
          {/* Right section */}
          <div className="flex items-center gap-2 justify-self-end"></div>
       </div>
    );
 }
 
+type SpecificScaleItem = {
+   value: Extract<PDFPageScaleType, "fit-height" | "fit-width">;
+   label: string;
+};
+type PercentageScaleItem = {
+   value: number;
+   label: string;
+};
+type ScaleItem = SpecificScaleItem | PercentageScaleItem;
 const SizeSelector = () => {
-   const { currentScale, setPdfState } = usePdfStore(
+   const { currentScale } = usePDFStore(
       useShallow((state) => ({
-         currentScale: state.state.currentScale,
-         setPdfState: state.setPdfState,
+         currentScale: state.currentScale,
       })),
    );
+   const { changeCurrentScale } = usePDFStoreActions();
 
-   const items = [
+   const items: ScaleItem[] = [
       {
          value: "fit-height",
          label: "Fit to height",
@@ -85,52 +87,43 @@ const SizeSelector = () => {
          label: "Fit to width",
       },
       {
-         value: "10",
+         value: 10,
          label: "10%",
       },
       {
-         value: "25",
+         value: 25,
          label: "25%",
       },
       {
-         value: "50",
+         value: 50,
          label: "50%",
       },
       {
-         value: "100",
+         value: 100,
          label: "100%",
       },
       {
-         value: "150",
+         value: 150,
          label: "150%",
       },
       {
-         value: "200",
+         value: 200,
          label: "200%",
       },
       {
-         value: "300",
+         value: 300,
          label: "300%",
       },
       {
-         value: "500",
+         value: 500,
          label: "500%",
       },
    ];
    const handleScaleChange = (value: string) => {
       if (value === "fit-width" || value === "fit-height") {
-         setPdfState({
-            currentScale: {
-               scaleType: value,
-            },
-         });
+         changeCurrentScale(value);
       } else {
-         setPdfState({
-            currentScale: {
-               scaleType: "percentage",
-               scaleValue: parseInt(value),
-            },
-         });
+         changeCurrentScale("percentage", parseInt(value));
       }
    };
    return (
@@ -140,21 +133,23 @@ const SizeSelector = () => {
             value={
                currentScale.scaleType !== "percentage"
                   ? currentScale.scaleType
-                  : currentScale.scaleValue?.toString()
+                  : currentScale.scalePercentage.toString()
             }
          >
             <SelectTrigger className="cursor-pointer focus-visible:outline-none focus-visible:ring-0 focus-visible:border-gray-600 border border-gray-600 data-[size=default]:h-8">
                {currentScale.scaleType === "percentage" && (
-                  <p>{currentScale.scaleValue}%</p>
+                  <p>{currentScale.scalePercentage}%</p>
                )}
                {currentScale.scaleType === "fit-width" && <p>Fit to width</p>}
-               {currentScale.scaleType === "fit-height" && <p>Fit to height</p>}
+               {currentScale.scaleType === "fit-height" && (
+                  <p>Fit to height</p>
+               )}
             </SelectTrigger>
             <SelectContent align="center" className="w-[150px]">
                {items.map((item) => (
                   <SelectItem
                      key={item.value}
-                     value={item.value}
+                     value={item.value.toString()}
                      className="cursor-pointer"
                   >
                      {item.label}
@@ -168,12 +163,12 @@ const SizeSelector = () => {
 
 type PageTransitionItem = {
    label: string;
-   value: PageTransitionView;
+   value: PDFPageTransition;
    icon: React.ElementType;
 };
 type PageLayoutItem = {
    label: string;
-   value: PageLayoutView;
+   value: PDFPageLayout;
    icon: React.ElementType;
 };
 function ViewControl() {
@@ -206,7 +201,9 @@ function ViewControl() {
          icon: Columns2,
       },
    ];
-   const viewControl = usePdfStore((state) => state.state.viewControl);
+   const pageTransition = usePDFStore((state) => state.pageTransition);
+   const pageLayout = usePDFStore((state) => state.pageLayout);
+   const { setPageTransition, setPageLayout } = usePDFStoreActions();
    return (
       <div>
          <Popover>
@@ -224,21 +221,10 @@ function ViewControl() {
                            key={item.value}
                            className={cn(
                               "px-2 py-1 hover:bg-accent cursor-pointer transition-all rounded-md flex items-center gap-1",
-                              item.value === viewControl.pageTransition
-                                 ? "bg-accent"
-                                 : "",
+                              item.value === pageTransition ? "bg-accent" : "",
                            )}
                            onClick={() => {
-                              usePdfStore.setState((state) => ({
-                                 ...state,
-                                 state: {
-                                    ...state.state,
-                                    viewControl: {
-                                       ...state.state.viewControl,
-                                       pageTransition: item.value,
-                                    },
-                                 },
-                              }));
+                              setPageTransition(item.value);
                            }}
                         >
                            <item.icon className="w-5 h-5" />
@@ -256,21 +242,10 @@ function ViewControl() {
                            key={item.value}
                            className={cn(
                               "px-2 py-1 hover:bg-accent cursor-pointer transition-all rounded-md flex items-center gap-1",
-                              item.value === viewControl.pageLayout
-                                 ? "bg-accent"
-                                 : "",
+                              item.value === pageLayout ? "bg-accent" : "",
                            )}
                            onClick={() => {
-                              usePdfStore.setState((state) => ({
-                                 ...state,
-                                 state: {
-                                    ...state.state,
-                                    viewControl: {
-                                       ...state.state.viewControl,
-                                       pageLayout: item.value,
-                                    },
-                                 },
-                              }));
+                              setPageLayout(item.value);
                            }}
                         >
                            <item.icon className="w-5 h-5" />
@@ -286,11 +261,11 @@ function ViewControl() {
 }
 
 type CurrentPageNumberProps = {
-   onChange?: (pageNumber: number) => void;
+   onSubmit?: (pageNumber: number) => void;
 };
 const CurrentPageNumber = (props: CurrentPageNumberProps) => {
-   const currentPageNumber = usePdfStore((state) => state.state.currentPage);
-   const numPages = usePdfStore((state) => state.state.numPages);
+   const currentPageNumber = usePDFStore((state) => state.currentPage);
+   const numPages = usePDFStore((state) => state.numPages);
    const inputRef = useRef<HTMLInputElement>(null);
    const [pageNumberInput, setPageNumberInput] = useState(
       currentPageNumber.toString(),
@@ -338,7 +313,7 @@ const CurrentPageNumber = (props: CurrentPageNumberProps) => {
                   if (isNaN(updatePageNumber)) {
                      return;
                   }
-                  props.onChange?.(updatePageNumber);
+                  props.onSubmit?.(updatePageNumber);
                   return;
                }
                if (!isValidKey(e.key)) {

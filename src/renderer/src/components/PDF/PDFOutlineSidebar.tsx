@@ -1,4 +1,4 @@
-import { usePdfStore } from "@/stores/pdfStore";
+import { usePDFStore, usePDFStoreActions } from "./PDFProvider";
 import { PdfOutline } from "@/types/pdf.types";
 import { ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -9,16 +9,15 @@ import { cn } from "@/utils/tailwindUtils";
 import { ScrollArea } from "../shadcn/scroll-area";
 import { PDFDocumentProxy } from "pdfjs-dist";
 
-export function PdfOutlineSidebar() {
-   const { documentProxy, viewControl, navigateToPage, currentPage } =
-      usePdfStore(
-         useShallow((state) => ({
-            documentProxy: state.documentProxy,
-            viewControl: state.state.viewControl,
-            navigateToPage: state.navigateToPage,
-            currentPage: state.state.currentPage,
-         })),
-      );
+export function PDFOutlineSidebar() {
+   const { documentProxy, pageLayout, currentPage } = usePDFStore(
+      useShallow((state) => ({
+         documentProxy: state.documentProxy,
+         pageLayout: state.pageLayout,
+         currentPage: state.currentPage,
+      })),
+   );
+   const { scrollToPage } = usePDFStoreActions();
    const [outlines, setOutlines] = useState<PdfOutline[]>([]);
    useEffect(() => {
       if (!documentProxy) return;
@@ -35,18 +34,18 @@ export function PdfOutlineSidebar() {
       loadOutline();
    }, [documentProxy]);
    const handleOutlineClick = (pageIndex: number) => {
-      if (viewControl.pageLayout === "single-page") {
-         navigateToPage(pageIndex);
+      const navigatePage = pageIndex + 1;
+      if (pageLayout === "single-page") {
+         scrollToPage(navigatePage);
          return;
       }
-      if (viewControl.pageLayout === "double-page") {
-         const navigateIndex = Math.floor(pageIndex / 2);
-         navigateToPage(navigateIndex);
+      if (pageLayout === "double-page") {
+         const navigatePage = Math.floor(pageIndex / 2);
+         scrollToPage(navigatePage);
          return;
       }
-      if (viewControl.pageLayout === "cover-facing-page") {
-         const navigateIndex = pageIndex === 0 ? 0 : Math.ceil(pageIndex / 2);
-         navigateToPage(navigateIndex);
+      if (pageLayout === "cover-facing-page") {
+         scrollToPage(navigatePage === 1 ? 1 : Math.ceil(navigatePage / 2));
          return;
       }
    };
@@ -75,7 +74,7 @@ export function PdfOutlineSidebar() {
 type OutlineItemProps = {
    outline: PdfOutline;
    level?: number;
-   documentProxy: PDFDocumentProxy | null;
+   documentProxy?: PDFDocumentProxy;
    onClick?: (pageIndex: number) => void;
    currentPage: number;
 };

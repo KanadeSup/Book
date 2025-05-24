@@ -1,20 +1,20 @@
-import { usePdfStore } from "@/stores/pdfStore";
-import { RenderTask, TextLayer } from "pdfjs-dist";
 import { useEffect, useRef } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { usePDFStore } from "./PDFProvider";
+import { TextLayer } from "pdfjs-dist";
+import { RenderTask } from "pdfjs-dist";
 
-export type PdfPageProps = {
+export type PDFPageProps = {
    pageNumber: number;
    scale?: number;
-   borderSize?: number;
-   defaultWidth?: number;
    defaultHeight?: number;
+   defaultWidth?: number;
 };
-export function PdfPage(props: PdfPageProps) {
+export function PDFPage(props: PDFPageProps) {
+   const pageRef = useRef<HTMLDivElement>(null);
    const canvasRef = useRef<HTMLCanvasElement>(null);
    const textLayerRef = useRef<HTMLDivElement>(null);
-   const pageRef = useRef<HTMLDivElement>(null);
-   const { documentProxy } = usePdfStore(
+   const { documentProxy } = usePDFStore(
       useShallow((state) => ({
          documentProxy: state.documentProxy,
       })),
@@ -32,7 +32,6 @@ export function PdfPage(props: PdfPageProps) {
       const renderPage = async function () {
          const pageProxy = await documentProxy.getPage(props.pageNumber);
          const viewport = pageProxy.getViewport({ scale: props.scale ?? 1 });
-
          // Set draw resolution for canvas
          canvas.width = viewport.width;
          canvas.height = viewport.height;
@@ -65,14 +64,12 @@ export function PdfPage(props: PdfPageProps) {
          renderTask?.cancel();
          textLayer?.cancel();
       };
-   }, [documentProxy]);
-
+   }, [documentProxy, props.scale]);
    return (
       <div
          ref={pageRef}
-         className="page m-0! box-content"
+         className="page border-none! box-content"
          style={{
-            border: `${props.borderSize ?? 0}px solid transparent`,
             width: props.defaultWidth ? props.defaultWidth : "auto",
             height: props.defaultHeight ? props.defaultHeight : "auto",
          }}
