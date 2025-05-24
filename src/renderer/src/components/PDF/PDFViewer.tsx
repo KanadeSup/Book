@@ -6,13 +6,14 @@ import { PDFPage } from "./PDFPage";
 import { useShallow } from "zustand/react/shallow";
 import { usePDFStore, usePDFStoreActions } from "./PDFProvider";
 import { throttle } from "lodash";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 
 export type PDFViewerProps = {
    gapSize?: number;
 };
 export function PDFViewer(props: PDFViewerProps) {
    const { gapSize = 0 } = props;
+   const scrollAmountTotal = useRef(0);
    const { numPages, basePDFPageSize, currentScale, pageLayout } = usePDFStore(
       useShallow((state) => ({
          numPages: state.numPages,
@@ -21,7 +22,7 @@ export function PDFViewer(props: PDFViewerProps) {
          pageLayout: state.pageLayout,
       })),
    );
-   const { updateState } = usePDFStoreActions();
+   const { updateState, changeCurrentScale } = usePDFStoreActions();
    const viewContainerRef = (element: HTMLDivElement) => {
       updateState({
          viewContainer: element,
@@ -85,7 +86,6 @@ export function PDFViewer(props: PDFViewerProps) {
       }
 
       if (pageLayout === "double-page") {
-         console.log(basePDFPageSize.height * currentScaleValue);
          return (basePDFPageSize.height * currentScaleValue) / 2 + gapSize * 2;
       }
 
@@ -201,12 +201,39 @@ export function PDFViewer(props: PDFViewerProps) {
       }
       return null;
    };
+   const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+      if (!event.ctrlKey) return;
+      if (!currentScale.scalePercentage) {
+         console.error("currentScale.scalePercentage is undefined");
+         return;
+      }
+      const THRESHOLD = 150;
+      const eventScrollAmount = event.deltaY;
+      const eventScrollAmountSign = Math.sign(eventScrollAmount);
+      const totalScrollAmountSign = Math.sign(scrollAmountTotal.current);
+      if (eventScrollAmountSign !== totalScrollAmountSign) {
+         scrollAmountTotal.current = eventScrollAmount;
+      } else {
+         scrollAmountTotal.current += eventScrollAmount;
+      }
+
+      if (scrollAmountTotal.current > THRESHOLD) {
+         currentScale.scalePercentage = currentScale.scalePercentage - 10;
+         scrollAmountTotal.current = 0;
+         changeCurrentScale("percentage", currentScale.scalePercentage - 10);
+      } else if (scrollAmountTotal.current < -THRESHOLD) {
+         currentScale.scalePercentage = currentScale.scalePercentage + 10;
+         scrollAmountTotal.current = 0;
+         changeCurrentScale("percentage", currentScale.scalePercentage + 10);
+      }
+   };
    if (!basePDFPageSize || !numPages) {
       return <div>Loading...</div>;
    }
    return (
       <div
          className="pdfViewer w-full h-screen overflow-hidden"
+         onWheel={handleWheel}
          style={
             {
                "--scale-factor":
