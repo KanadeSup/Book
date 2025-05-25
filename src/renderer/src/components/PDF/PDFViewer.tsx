@@ -6,7 +6,7 @@ import { PDFPage } from "./PDFPage";
 import { useShallow } from "zustand/react/shallow";
 import { usePDFStore, usePDFStoreActions } from "./PDFProvider";
 import { throttle } from "lodash";
-import { useMemo, useRef } from "react";
+import { memo, useMemo, useRef } from "react";
 import { useConfigStore } from "@/stores/configStore";
 
 // Constants
@@ -193,57 +193,59 @@ type PDFPageRowProps = {
    pageScale: number;
    basePDFPageSize: { height: number; width: number };
 };
-function PDFPageRow({
-   index,
-   style,
-   pageLayout,
-   pageGapSize,
-   width,
-   pageScale,
-   basePDFPageSize,
-}: PDFPageRowProps) {
-   const commonStyle = {
-      ...style,
+const PDFPageRow = memo(
+   ({
+      index,
+      style,
+      pageLayout,
+      pageGapSize,
       width,
-      minWidth: "100%",
-   };
-   const defaultPDFPageSize = {
-      height: (basePDFPageSize.height * pageScale) / 100,
-      width: (basePDFPageSize.width * pageScale) / 100,
-   };
+      pageScale,
+      basePDFPageSize,
+   }: PDFPageRowProps) => {
+      const commonStyle = {
+         ...style,
+         width,
+         minWidth: "100%",
+      };
+      const defaultPDFPageSize = {
+         height: (basePDFPageSize.height * pageScale) / 100,
+         width: (basePDFPageSize.width * pageScale) / 100,
+      };
 
-   const layoutComponents = {
-      "single-page": () => (
-         <SinglePageLayout
-            commonStyle={commonStyle}
-            index={index}
-            pageScale={pageScale}
-            defaultPDFPageSize={defaultPDFPageSize}
-         />
-      ),
-      "double-page": () => (
-         <DoublePageLayout
-            commonStyle={commonStyle}
-            index={index}
-            pageScale={pageScale}
-            pageGapSize={pageGapSize}
-            defaultPDFPageSize={defaultPDFPageSize}
-         />
-      ),
-      "cover-facing-page": () => (
-         <CoverFacingPageLayout
-            commonStyle={commonStyle}
-            index={index}
-            pageScale={pageScale}
-            pageGapSize={pageGapSize}
-            width={width}
-            defaultPDFPageSize={defaultPDFPageSize}
-         />
-      ),
-   };
+      const layoutComponents = {
+         "single-page": () => (
+            <SinglePageLayout
+               commonStyle={commonStyle}
+               index={index}
+               pageScale={pageScale}
+               defaultPDFPageSize={defaultPDFPageSize}
+            />
+         ),
+         "double-page": () => (
+            <DoublePageLayout
+               commonStyle={commonStyle}
+               index={index}
+               pageScale={pageScale}
+               pageGapSize={pageGapSize}
+               defaultPDFPageSize={defaultPDFPageSize}
+            />
+         ),
+         "cover-facing-page": () => (
+            <CoverFacingPageLayout
+               commonStyle={commonStyle}
+               index={index}
+               pageScale={pageScale}
+               pageGapSize={pageGapSize}
+               width={width}
+               defaultPDFPageSize={defaultPDFPageSize}
+            />
+         ),
+      };
 
-   return layoutComponents[pageLayout]?.() || null;
-}
+      return layoutComponents[pageLayout]?.() || null;
+   },
+);
 
 type SinglePageLayoutProps = {
    commonStyle: React.CSSProperties;
