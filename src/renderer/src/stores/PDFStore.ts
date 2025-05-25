@@ -29,6 +29,11 @@ export type PDFStore = {
          scaleType: PDFPageScaleType,
          scalePercentage?: number,
       ) => void;
+      caculatePDFPageScale: (
+         scaleType: PDFPageScaleType,
+         scalePercentage?: number,
+      ) => PDFPageScale;
+      refreshCurrentScale: () => void;
       setPageLayout: (pageLayout: PDFPageLayout) => void;
       setPageTransition: (pageTransition: PDFPageTransition) => void;
       setViewContainer: (viewContainer: HTMLDivElement) => void;
@@ -61,13 +66,30 @@ export const createPDFStore = (initialState: Omit<PDFStore, "actions">) => {
             scaleType: PDFPageScaleType,
             scalePercentage?: number,
          ) => {
+            const newScale = get().actions.caculatePDFPageScale(
+               scaleType,
+               scalePercentage,
+            );
+            set({ currentScale: newScale });
+         },
+         refreshCurrentScale: () => {
+            const currentScale = get().currentScale;
+            const newScale = get().actions.caculatePDFPageScale(
+               currentScale.scaleType,
+               currentScale.scalePercentage,
+            );
+            set({ currentScale: newScale });
+         },
+         caculatePDFPageScale: (
+            scaleType: PDFPageScaleType,
+            scalePercentage?: number,
+         ): PDFPageScale => {
             if (scaleType === "percentage") {
                if (!scalePercentage)
                   throw new Error(
                      "Scale percentage is required when scale type is percentage",
                   );
-               set({ currentScale: { scaleType, scalePercentage } });
-               return;
+               return { scaleType, scalePercentage };
             }
 
             const viewContainer = get().viewContainer;
@@ -91,12 +113,10 @@ export const createPDFStore = (initialState: Omit<PDFStore, "actions">) => {
                const fitHeightScalePercentage =
                   (viewContainerHeightWithoutGaps / basePDFPageSize.height) *
                   100;
-               set({
-                  currentScale: {
-                     scaleType,
-                     scalePercentage: fitHeightScalePercentage,
-                  },
-               });
+               return {
+                  scaleType,
+                  scalePercentage: fitHeightScalePercentage,
+               };
             } else if (scaleType === "fit-width") {
                const viewContainerWidth = viewContainer.clientWidth;
                const viewContainerWidthWithoutGaps =
@@ -110,15 +130,17 @@ export const createPDFStore = (initialState: Omit<PDFStore, "actions">) => {
                }
                const pageWidthScalePercentage =
                   (spaceForEachPage / basePDFPageSize.width) * 100;
-               set({
-                  currentScale: {
-                     scaleType,
-                     scalePercentage: pageWidthScalePercentage,
-                  },
-               });
+               return {
+                  scaleType,
+                  scalePercentage: pageWidthScalePercentage,
+               };
             }
+            return { scaleType, scalePercentage: 100 };
          },
-         setPageLayout: (pageLayout: PDFPageLayout) => set({ pageLayout }),
+         setPageLayout: (pageLayout: PDFPageLayout) => {
+            set({ pageLayout });
+            get().actions.refreshCurrentScale();
+         },
          setPageTransition: (pageTransition: PDFPageTransition) =>
             set({ pageTransition }),
          setViewContainer: (viewContainer: HTMLDivElement) =>
