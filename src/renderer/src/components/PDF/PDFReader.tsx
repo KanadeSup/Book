@@ -34,7 +34,7 @@ function Main() {
             }}
             className="transition-all duration-300 overflow-hidden border-r border-accent shrink-0"
          >
-            <div className="w-[300px] ">
+            <div className="w-[300px] h-full">
                <PDFOutlineSidebar />
             </div>
          </div>
