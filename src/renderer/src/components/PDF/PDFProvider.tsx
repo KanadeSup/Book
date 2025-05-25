@@ -15,12 +15,12 @@ export default function PDFProvider(props: PDFProviderProps) {
          numPages: 0,
          currentPage: 0,
          basePDFPageSize: undefined,
-         currentScale: {
+         currentPageScale: {
             scaleType: "percentage",
             scalePercentage: 100,
          },
-         pageLayout: "single-page",
-         pageTransition: "continuous-page",
+         currentPageLayout: "single-page",
+         currentPageTransition: "continuous-page",
          viewContainer: undefined,
          pageScrollContainer: undefined,
       }),

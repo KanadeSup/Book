@@ -72,7 +72,7 @@ type ScaleItem = SpecificScaleItem | PercentageScaleItem;
 const SizeSelector = () => {
    const { currentScale } = usePDFStore(
       useShallow((state) => ({
-         currentScale: state.currentScale,
+         currentScale: state.currentPageScale,
       })),
    );
    const { changeCurrentScale } = usePDFStoreActions();
@@ -201,8 +201,8 @@ function ViewControl() {
          icon: Columns2,
       },
    ];
-   const pageTransition = usePDFStore((state) => state.pageTransition);
-   const pageLayout = usePDFStore((state) => state.pageLayout);
+   const pageTransition = usePDFStore((state) => state.currentPageTransition);
+   const pageLayout = usePDFStore((state) => state.currentPageLayout);
    const { setPageTransition, setPageLayout } = usePDFStoreActions();
    return (
       <div>

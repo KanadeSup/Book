@@ -13,7 +13,7 @@ export function PDFOutlineSidebar() {
    const { documentProxy, pageLayout, currentPage } = usePDFStore(
       useShallow((state) => ({
          documentProxy: state.documentProxy,
-         pageLayout: state.pageLayout,
+         pageLayout: state.currentPageLayout,
          currentPage: state.currentPage,
       })),
    );

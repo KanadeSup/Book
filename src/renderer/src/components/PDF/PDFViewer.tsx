@@ -16,8 +16,8 @@ export function PDFViewer() {
       useShallow((state) => ({
          numPages: state.numPages,
          basePDFPageSize: state.basePDFPageSize,
-         currentScale: state.currentScale,
-         pageLayout: state.pageLayout,
+         currentScale: state.currentPageScale,
+         pageLayout: state.currentPageLayout,
       })),
    );
    const { updateState, changeCurrentScale } = usePDFStoreActions();

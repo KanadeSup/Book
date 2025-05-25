@@ -9,14 +9,15 @@ import {
 } from "@/types/pdf.types";
 import { create } from "zustand";
 import { useConfigStore } from "./configStore";
+
 export type PDFStore = {
    documentProxy: PDFDocumentProxy | undefined;
    numPages: number;
    currentPage: number;
    basePDFPageSize: PDFPageDimension | undefined;
-   currentScale: PDFPageScale;
-   pageLayout: PDFPageLayout;
-   pageTransition: PDFPageTransition;
+   currentPageScale: PDFPageScale;
+   currentPageLayout: PDFPageLayout;
+   currentPageTransition: PDFPageTransition;
    viewContainer: HTMLDivElement | undefined;
    pageScrollContainer: FixedSizeList<any> | undefined;
 
@@ -70,79 +71,103 @@ export const createPDFStore = (initialState: Omit<PDFStore, "actions">) => {
                scaleType,
                scalePercentage,
             );
-            set({ currentScale: newScale });
+
+            set({ currentPageScale: newScale });
          },
          refreshCurrentScale: () => {
-            const currentScale = get().currentScale;
+            const currentScale = get().currentPageScale;
             const newScale = get().actions.caculatePDFPageScale(
                currentScale.scaleType,
                currentScale.scalePercentage,
             );
-            set({ currentScale: newScale });
+
+            set({ currentPageScale: newScale });
          },
          caculatePDFPageScale: (
             scaleType: PDFPageScaleType,
             scalePercentage?: number,
          ): PDFPageScale => {
+            // Percentage scale type
             if (scaleType === "percentage") {
-               if (!scalePercentage)
+               if (!scalePercentage) {
                   throw new Error(
                      "Scale percentage is required when scale type is percentage",
                   );
-               return { scaleType, scalePercentage };
+               }
+
+               const SCALE_PERCENTAGE_MIN = 10;
+               const SCALE_PERCENTAGE_MAX = 800;
+
+               const clampedPercentage = Math.min(
+                  Math.max(scalePercentage, SCALE_PERCENTAGE_MIN),
+                  SCALE_PERCENTAGE_MAX,
+               );
+
+               return {
+                  scaleType,
+                  scalePercentage: clampedPercentage,
+               };
             }
 
-            const viewContainer = get().viewContainer;
-            const basePDFPageSize = get().basePDFPageSize;
-            if (!viewContainer || !basePDFPageSize)
+            // Validate required state
+            const { viewContainer, basePDFPageSize, currentPageLayout } = get();
+            if (!viewContainer || !basePDFPageSize) {
                throw new Error(
-                  "View container and base PDF page size is required: viewContainer or basePDFPageSize is undefined",
+                  `Missing viewContainer or basePDFPageSize state: viewContainer=${!!viewContainer}, basePDFPageSize=${!!basePDFPageSize}`,
                );
+            }
+
+            // Calculate total gap size
             const pageGapSize = useConfigStore.getState().config.pageGapSize;
-            const pageLayout = get().pageLayout;
-            const totalHorizontalGapSize =
-               pageLayout === "double-page" ||
-               pageLayout === "cover-facing-page"
-                  ? pageGapSize * 4
-                  : pageGapSize * 2;
+            const isDoublePageLayout =
+               currentPageLayout === "double-page" ||
+               currentPageLayout === "cover-facing-page";
+            const totalHorizontalGapSize = isDoublePageLayout
+               ? pageGapSize * 4
+               : pageGapSize * 2;
             const totalVerticalGapSize = pageGapSize * 2;
+
+            // Calculate available space
+            const viewHeight = viewContainer.offsetHeight;
+            const viewWidth = viewContainer.clientWidth;
+            const availableWidth = viewWidth - totalHorizontalGapSize;
+            const availableHeight = viewHeight - totalVerticalGapSize;
+
+            // Calculate scale base on scale type
+            const { height: basePDFPageHeight, width: basePDFPageWidth } =
+               basePDFPageSize;
+
             if (scaleType === "fit-height") {
-               const viewContainerHeight = viewContainer.offsetHeight;
-               const viewContainerHeightWithoutGaps =
-                  viewContainerHeight - totalVerticalGapSize;
-               const fitHeightScalePercentage =
-                  (viewContainerHeightWithoutGaps / basePDFPageSize.height) *
-                  100;
+               const scalePercentage =
+                  (availableHeight / basePDFPageHeight) * 100;
                return {
                   scaleType,
-                  scalePercentage: fitHeightScalePercentage,
-               };
-            } else if (scaleType === "fit-width") {
-               const viewContainerWidth = viewContainer.clientWidth;
-               const viewContainerWidthWithoutGaps =
-                  viewContainerWidth - totalHorizontalGapSize;
-               let spaceForEachPage = viewContainerWidthWithoutGaps;
-               if (
-                  pageLayout === "double-page" ||
-                  pageLayout === "cover-facing-page"
-               ) {
-                  spaceForEachPage = spaceForEachPage / 2;
-               }
-               const pageWidthScalePercentage =
-                  (spaceForEachPage / basePDFPageSize.width) * 100;
-               return {
-                  scaleType,
-                  scalePercentage: pageWidthScalePercentage,
+                  scalePercentage,
                };
             }
-            return { scaleType, scalePercentage: 100 };
+
+            if (scaleType === "fit-width") {
+               const availableWidthForEachPage = isDoublePageLayout
+                  ? availableWidth / 2
+                  : availableWidth;
+               const scalePercentage =
+                  (availableWidthForEachPage / basePDFPageWidth) * 100;
+               return {
+                  scaleType,
+                  scalePercentage,
+               };
+            }
+
+            // fallback
+            console.error(`Invalid scale type: ${scaleType}`);
+            return { scaleType: "percentage", scalePercentage: 100 };
          },
          setPageLayout: (pageLayout: PDFPageLayout) => {
-            set({ pageLayout });
+            set({ currentPageLayout: pageLayout });
             get().actions.refreshCurrentScale();
          },
          setPageTransition: (pageTransition: PDFPageTransition) =>
-            set({ pageTransition }),
+            set({ currentPageTransition: pageTransition }),
          setViewContainer: (viewContainer: HTMLDivElement) =>
             set({ viewContainer }),
          setPageScrollContainer: (pageScrollContainer: FixedSizeList<any>) =>
