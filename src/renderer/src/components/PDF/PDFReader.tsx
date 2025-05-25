@@ -42,7 +42,7 @@ function Main() {
             <div className="w-full">
                <PDFToolbar />
             </div>
-            <PDFViewer gapSize={0} />
+            <PDFViewer />
          </div>
       </div>
    );

@@ -8,7 +8,7 @@ import {
    PDFPageScaleType,
 } from "@/types/pdf.types";
 import { create } from "zustand";
-
+import { useConfigStore } from "./configStore";
 export type PDFStore = {
    documentProxy: PDFDocumentProxy | undefined;
    numPages: number;
@@ -74,11 +74,23 @@ export const createPDFStore = (initialState: Omit<PDFStore, "actions">) => {
             const basePDFPageSize = get().basePDFPageSize;
             if (!viewContainer || !basePDFPageSize)
                throw new Error(
-                  "View container or base PDF page size is required",
+                  "View container and base PDF page size is required: viewContainer or basePDFPageSize is undefined",
                );
+            const pageGapSize = useConfigStore.getState().config.pageGapSize;
+            const pageLayout = get().pageLayout;
+            const totalHorizontalGapSize =
+               pageLayout === "double-page" ||
+               pageLayout === "cover-facing-page"
+                  ? pageGapSize * 4
+                  : pageGapSize * 2;
+            const totalVerticalGapSize = pageGapSize * 2;
             if (scaleType === "fit-height") {
+               const viewContainerHeight = viewContainer.offsetHeight;
+               const viewContainerHeightWithoutGaps =
+                  viewContainerHeight - totalVerticalGapSize;
                const fitHeightScalePercentage =
-                  (viewContainer.offsetHeight / basePDFPageSize.height) * 100;
+                  (viewContainerHeightWithoutGaps / basePDFPageSize.height) *
+                  100;
                set({
                   currentScale: {
                      scaleType,
@@ -86,12 +98,22 @@ export const createPDFStore = (initialState: Omit<PDFStore, "actions">) => {
                   },
                });
             } else if (scaleType === "fit-width") {
-               const fitWidthScalePercentage =
-                  (viewContainer.clientWidth / basePDFPageSize.width) * 100;
+               const viewContainerWidth = viewContainer.clientWidth;
+               const viewContainerWidthWithoutGaps =
+                  viewContainerWidth - totalHorizontalGapSize;
+               let spaceForEachPage = viewContainerWidthWithoutGaps;
+               if (
+                  pageLayout === "double-page" ||
+                  pageLayout === "cover-facing-page"
+               ) {
+                  spaceForEachPage = spaceForEachPage / 2;
+               }
+               const pageWidthScalePercentage =
+                  (spaceForEachPage / basePDFPageSize.width) * 100;
                set({
                   currentScale: {
                      scaleType,
-                     scalePercentage: fitWidthScalePercentage,
+                     scalePercentage: pageWidthScalePercentage,
                   },
                });
             }

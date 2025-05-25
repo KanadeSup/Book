@@ -7,13 +7,11 @@ import { useShallow } from "zustand/react/shallow";
 import { usePDFStore, usePDFStoreActions } from "./PDFProvider";
 import { throttle } from "lodash";
 import { useMemo, useRef } from "react";
+import { useConfigStore } from "@/stores/configStore";
 
-export type PDFViewerProps = {
-   gapSize?: number;
-};
-export function PDFViewer(props: PDFViewerProps) {
-   const { gapSize = 0 } = props;
+export function PDFViewer() {
    const scrollAmountTotal = useRef(0);
+   const pageGapSize = useConfigStore((state) => state.config.pageGapSize);
    const { numPages, basePDFPageSize, currentScale, pageLayout } = usePDFStore(
       useShallow((state) => ({
          numPages: state.numPages,
@@ -64,6 +62,7 @@ export function PDFViewer(props: PDFViewerProps) {
          });
       }
    }, 100);
+
    const fixedSizeListNumRows = useMemo(() => {
       if (pageLayout === "single-page") {
          return numPages;
@@ -80,21 +79,8 @@ export function PDFViewer(props: PDFViewerProps) {
       if (!basePDFPageSize) return 0;
 
       const currentScaleValue = currentScale.scalePercentage / 100;
-
-      if (pageLayout === "single-page") {
-         return basePDFPageSize.height * currentScaleValue + gapSize * 2;
-      }
-
-      if (pageLayout === "double-page") {
-         return (basePDFPageSize.height * currentScaleValue) / 2 + gapSize * 2;
-      }
-
-      if (pageLayout === "cover-facing-page") {
-         return (basePDFPageSize.height * currentScaleValue) / 2 + gapSize * 2;
-      }
-
-      return 0;
-   }, [pageLayout, numPages, currentScale, gapSize]);
+      return basePDFPageSize.height * currentScaleValue + pageGapSize * 2;
+   }, [pageLayout, numPages, currentScale, pageGapSize]);
 
    const fixedSizeRowWidth = useMemo(() => {
       if (!basePDFPageSize) return 0;
@@ -103,14 +89,14 @@ export function PDFViewer(props: PDFViewerProps) {
    }, [basePDFPageSize, currentScale]);
 
    const PDFPageRow = ({ index, style }) => {
-      const currentScaleValue = currentScale.scalePercentage / 100;
+      const pageScale = currentScale.scalePercentage / 100;
       const { height: baseHeight, width: baseWidth } = basePDFPageSize || {};
       if (pageLayout === "single-page") {
          return (
             <div
                style={{
                   ...style,
-                  padding: `${gapSize}px`,
+                  padding: `${pageGapSize}px`,
                   width: fixedSizeRowWidth,
                   minWidth: "100%",
                }}
@@ -119,29 +105,29 @@ export function PDFViewer(props: PDFViewerProps) {
             >
                <PDFPage
                   pageNumber={index + 1}
-                  scale={currentScaleValue}
-                  defaultHeight={baseHeight && baseHeight * currentScaleValue}
-                  defaultWidth={baseWidth && baseWidth * currentScaleValue}
+                  scale={pageScale}
+                  defaultHeight={baseHeight && baseHeight * pageScale}
+                  defaultWidth={baseWidth && baseWidth * pageScale}
                />
             </div>
          );
       }
       if (pageLayout === "double-page") {
-         const pageScale = currentScaleValue / 2;
          return (
             <div
                style={{
                   ...style,
-                  padding: `${gapSize}px`,
+                  padding: `${pageGapSize}px`,
                   width: fixedSizeRowWidth,
+                  minWidth: "100%",
                }}
-               className="grid place-items-start justify-items-center overflow-hidden"
+               className="grid place-items-start justify-items-center"
                key={index}
             >
                <div
                   className="flex"
                   style={{
-                     gap: `${gapSize * 2}px`,
+                     gap: `${pageGapSize * 2}px`,
                   }}
                >
                   <PDFPage
@@ -161,12 +147,13 @@ export function PDFViewer(props: PDFViewerProps) {
          );
       }
       if (pageLayout === "cover-facing-page") {
-         const pageScale = currentScaleValue / 2;
          return index === 0 ? (
             <div
                style={{
                   ...style,
-                  padding: `${gapSize * 2}px`,
+                  padding: `${pageGapSize * 2}px`,
+                  width: fixedSizeRowWidth,
+                  minWidth: "100%",
                }}
                className="grid place-items-start justify-items-center"
                key={index}
@@ -182,16 +169,17 @@ export function PDFViewer(props: PDFViewerProps) {
             <div
                style={{
                   ...style,
-                  padding: `${gapSize * 2}px`,
+                  padding: `${pageGapSize * 2}px`,
                   width: fixedSizeRowWidth,
+                  minWidth: "100%",
                }}
                className="grid place-items-start justify-items-center"
                key={index}
             >
                <div
-                  className="grid grid-cols-2 h-full"
+                  className="flex"
                   style={{
-                     gap: `${gapSize}px`,
+                     gap: `${pageGapSize * 2}px`,
                   }}
                >
                   <PDFPage

@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware'
 
 export type configState = {
    spacePath?: string | null;
+   pageGapSize: number;
 };
 export type ConfigStore = {
    config: configState;
@@ -14,6 +15,7 @@ export const useConfigStore = create<ConfigStore>()(
       (set) => ({
          config: {
             spacePath: "null",
+            pageGapSize: 10,
          },
          setConfig: (config) => {
             set(() => ({ config: config }));
