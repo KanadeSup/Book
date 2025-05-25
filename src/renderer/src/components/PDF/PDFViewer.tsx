@@ -95,6 +95,13 @@ export function PDFViewer(props: PDFViewerProps) {
 
       return 0;
    }, [pageLayout, numPages, currentScale, gapSize]);
+
+   const fixedSizeRowWidth = useMemo(() => {
+      if (!basePDFPageSize) return 0;
+      const currentScaleValue = currentScale.scalePercentage / 100;
+      return basePDFPageSize.width * currentScaleValue;
+   }, [basePDFPageSize, currentScale]);
+
    const PDFPageRow = ({ index, style }) => {
       const currentScaleValue = currentScale.scalePercentage / 100;
       const { height: baseHeight, width: baseWidth } = basePDFPageSize || {};
@@ -104,6 +111,8 @@ export function PDFViewer(props: PDFViewerProps) {
                style={{
                   ...style,
                   padding: `${gapSize}px`,
+                  width: fixedSizeRowWidth,
+                  minWidth: "100%",
                }}
                className="grid place-items-start justify-items-center"
                key={index}
@@ -124,6 +133,7 @@ export function PDFViewer(props: PDFViewerProps) {
                style={{
                   ...style,
                   padding: `${gapSize}px`,
+                  width: fixedSizeRowWidth,
                }}
                className="grid place-items-start justify-items-center overflow-hidden"
                key={index}
@@ -173,6 +183,7 @@ export function PDFViewer(props: PDFViewerProps) {
                style={{
                   ...style,
                   padding: `${gapSize * 2}px`,
+                  width: fixedSizeRowWidth,
                }}
                className="grid place-items-start justify-items-center"
                key={index}
