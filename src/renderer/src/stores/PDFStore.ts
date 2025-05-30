@@ -1,5 +1,4 @@
 import { PDFDocumentProxy } from "pdfjs-dist";
-import { FixedSizeList } from "react-window";
 import {
    PDFPageDimension,
    PDFPageScale,
@@ -9,6 +8,7 @@ import {
 } from "@/types/pdf.types";
 import { create } from "zustand";
 import { useConfigStore } from "./configStore";
+import { Virtualizer } from "@tanstack/react-virtual";
 
 export type PDFStore = {
    documentProxy: PDFDocumentProxy | undefined;
@@ -18,8 +18,8 @@ export type PDFStore = {
    currentPageScale: PDFPageScale;
    currentPageLayout: PDFPageLayout;
    currentPageTransition: PDFPageTransition;
-   viewContainer: HTMLDivElement | undefined;
-   pageScrollContainer: FixedSizeList<any> | undefined;
+   virtualizerInstance: Virtualizer<HTMLDivElement, Element> | undefined;
+   scrollElement: HTMLDivElement | undefined;
 
    actions: {
       setDocumentProxy: (documentProxy: PDFDocumentProxy) => void;
@@ -37,8 +37,10 @@ export type PDFStore = {
       refreshCurrentScale: () => void;
       setPageLayout: (pageLayout: PDFPageLayout) => void;
       setPageTransition: (pageTransition: PDFPageTransition) => void;
-      setViewContainer: (viewContainer: HTMLDivElement) => void;
-      setPageScrollContainer: (pageScrollContainer: FixedSizeList<any>) => void;
+      setVirtualizerInstance: (
+         virtualizerInstance: Virtualizer<HTMLDivElement, Element>,
+      ) => void;
+      setScrollElement: (scrollElement: HTMLDivElement) => void;
       scrollToPage: (pageNumber: number) => void;
       updateState: (state: Partial<PDFStore>) => void;
    };
@@ -110,10 +112,10 @@ export const createPDFStore = (initialState: Omit<PDFStore, "actions">) => {
             }
 
             // Validate required state
-            const { viewContainer, basePDFPageSize, currentPageLayout } = get();
-            if (!viewContainer || !basePDFPageSize) {
+            const { scrollElement, basePDFPageSize, currentPageLayout } = get();
+            if (!scrollElement || !basePDFPageSize) {
                throw new Error(
-                  `Missing viewContainer or basePDFPageSize state: viewContainer=${!!viewContainer}, basePDFPageSize=${!!basePDFPageSize}`,
+                  `Missing scrollElement or basePDFPageSize state: scrollElement=${!!scrollElement}, basePDFPageSize=${!!basePDFPageSize}`,
                );
             }
 
@@ -128,8 +130,8 @@ export const createPDFStore = (initialState: Omit<PDFStore, "actions">) => {
             const totalVerticalGapSize = pageGapSize * 2;
 
             // Calculate available space
-            const viewHeight = viewContainer.offsetHeight;
-            const viewWidth = viewContainer.clientWidth;
+            const viewHeight = scrollElement.offsetHeight;
+            const viewWidth = scrollElement.clientWidth;
             const availableWidth = viewWidth - totalHorizontalGapSize;
             const availableHeight = viewHeight - totalVerticalGapSize;
 
@@ -168,14 +170,15 @@ export const createPDFStore = (initialState: Omit<PDFStore, "actions">) => {
          },
          setPageTransition: (pageTransition: PDFPageTransition) =>
             set({ currentPageTransition: pageTransition }),
-         setViewContainer: (viewContainer: HTMLDivElement) =>
-            set({ viewContainer }),
-         setPageScrollContainer: (pageScrollContainer: FixedSizeList<any>) =>
-            set({ pageScrollContainer }),
+         setVirtualizerInstance: (
+            virtualizerInstance: Virtualizer<HTMLDivElement, Element>,
+         ) => set({ virtualizerInstance }),
+         setScrollElement: (scrollElement: HTMLDivElement) =>
+            set({ scrollElement }),
          scrollToPage: (pageNumber: number) => {
-            const { pageScrollContainer } = get();
-            if (!pageScrollContainer) return;
-            pageScrollContainer.scrollToItem(pageNumber - 1, "start");
+            const { virtualizerInstance } = get();
+            if (!virtualizerInstance) return;
+            virtualizerInstance.scrollToIndex(pageNumber - 1);
          },
          updateState: (state: Partial<PDFStore>) => set(state),
       },

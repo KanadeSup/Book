@@ -1,13 +1,13 @@
 import "pdfjs-dist/web/pdf_viewer.css";
 import "@/assets/styles/scrolbar.css";
-import { FixedSizeList, ListOnScrollProps } from "react-window";
-import AutoSizer from "react-virtualized-auto-sizer";
 import { PDFPage } from "./PDFPage";
 import { useShallow } from "zustand/react/shallow";
 import { usePDFStore, usePDFStoreActions } from "./PDFProvider";
 import { throttle } from "lodash";
-import { memo, useMemo, useRef } from "react";
+import { memo, useEffect, useMemo, useRef } from "react";
 import { useConfigStore } from "@/stores/configStore";
+import { useSelectPDFText } from "@/hooks/useSelectPDFText";
+import { useVirtualizer } from "@tanstack/react-virtual";
 
 // Constants
 const ZOOM_THRESHOLD = 150;
@@ -16,27 +16,28 @@ const ZOOM_STEP = 10;
 export function PDFViewer() {
    const scrollAmountTotal = useRef(0);
    const pageGapSize = useConfigStore((state) => state.config.pageGapSize);
-   const { numPages, basePDFPageSize, currentPageScale, pageLayout } =
-      usePDFStore(
-         useShallow((state) => ({
-            numPages: state.numPages,
-            basePDFPageSize: state.basePDFPageSize,
-            currentPageScale: state.currentPageScale,
-            pageLayout: state.currentPageLayout,
-         })),
-      );
    const {
-      setViewContainer,
-      setPageScrollContainer,
+      numPages,
+      basePDFPageSize,
+      currentPageScale,
+      pageLayout,
+      scrollElement,
+   } = usePDFStore(
+      useShallow((state) => ({
+         numPages: state.numPages,
+         basePDFPageSize: state.basePDFPageSize,
+         currentPageScale: state.currentPageScale,
+         pageLayout: state.currentPageLayout,
+         scrollElement: state.scrollElement,
+      })),
+   );
+   // const { selectedText, setSelectedText } = useSelectPDFText(wrapperRef);
+   const {
+      setVirtualizerInstance,
+      setScrollElement,
       setCurrentPage,
       changeCurrentScale,
    } = usePDFStoreActions();
-   const viewContainerRef = (element: HTMLDivElement) => {
-      setViewContainer(element);
-   };
-   const contentScrollContainerRef = (element: FixedSizeList) => {
-      setPageScrollContainer(element);
-   };
 
    // calculate number of rows
    const numRows = useMemo(() => {
@@ -102,28 +103,28 @@ export function PDFViewer() {
    };
 
    // Handle update current page when scroll
-   const handleScroll = throttle(({ scrollOffset }: ListOnScrollProps) => {
+   const handleScroll = throttle((event: React.UIEvent<HTMLDivElement>) => {
       // validate required value
       if (!basePDFPageSize || !currentPageScale.scalePercentage) return;
 
+      const scrollOffset = event.currentTarget.scrollTop;
       const { height: basePDFHeight } = basePDFPageSize;
       const currentPageScaleValue = currentPageScale.scalePercentage / 100;
 
       const calculateCurrentPage = () => {
          const basePageHeight = basePDFHeight * currentPageScaleValue;
+         const pageHeightIncludeGap = basePageHeight + pageGapSize * 2;
 
          switch (pageLayout) {
             case "single-page": {
-               return Math.round(scrollOffset / basePageHeight) + 1;
+               return Math.round(scrollOffset / pageHeightIncludeGap) + 1;
             }
             case "double-page": {
-               const doublePageHeight = basePageHeight / 2;
-               return Math.round(scrollOffset / doublePageHeight) * 2 + 1;
+               return Math.round(scrollOffset / pageHeightIncludeGap) * 2 + 1;
             }
             case "cover-facing-page": {
-               const coverPageHeight = basePageHeight / 2;
                const currentRow =
-                  Math.round(scrollOffset / coverPageHeight) + 1;
+                  Math.round(scrollOffset / pageHeightIncludeGap) + 1;
                return currentRow <= 2 ? currentRow : (currentRow - 1) * 2;
             }
             default:
@@ -135,14 +136,33 @@ export function PDFViewer() {
    }, 100);
 
    // If required values are missing, return an empty div to indicate loading state
+   const rowVirtualizer = useVirtualizer({
+      count: numRows,
+      getScrollElement: () => scrollElement ?? null,
+      estimateSize: () => rowHeight,
+      overscan: 3,
+   });
+
+   useEffect(() => {
+      rowVirtualizer.measure();
+   }, [rowHeight]);
+   useEffect(() => {
+      setVirtualizerInstance(rowVirtualizer);
+   }, [rowVirtualizer]);
+
    if (!basePDFPageSize || !numPages) {
       return <div></div>;
    }
 
    return (
       <div
-         className="pdfViewer w-full h-screen overflow-hidden"
+         className="pdfViewer w-full h-screen overflow-auto"
          onWheel={handleWheel}
+         ref={(element) => {
+            if (!element) return;
+            setScrollElement(element);
+         }}
+         onScroll={handleScroll}
          style={
             {
                "--scale-factor":
@@ -152,34 +172,33 @@ export function PDFViewer() {
             } as React.CSSProperties
          }
       >
-         <AutoSizer disableWidth={true} className="w-full overflow-hidden">
-            {({ height }) => {
-               return (
-                  <FixedSizeList
-                     ref={contentScrollContainerRef}
-                     outerRef={viewContainerRef}
-                     height={height}
-                     className="dark-lean-scrollbar"
-                     width="100%"
-                     itemCount={numRows}
-                     itemSize={rowHeight}
-                     onScroll={handleScroll}
-                  >
-                     {({ index, style }) => (
-                        <PDFPageRow
-                           index={index}
-                           style={style}
-                           pageLayout={pageLayout}
-                           pageGapSize={pageGapSize}
-                           width={rowWidth}
-                           pageScale={currentPageScale.scalePercentage / 100}
-                           basePDFPageSize={basePDFPageSize}
-                        />
-                     )}
-                  </FixedSizeList>
-               );
+         <div
+            style={{
+               height: `${rowVirtualizer.getTotalSize()}px`,
+               width: "100%",
+               position: "relative",
             }}
-         </AutoSizer>
+         >
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => (
+               <PDFPageRow
+                  key={virtualRow.index}
+                  index={virtualRow.index}
+                  style={{
+                     position: "absolute",
+                     top: 0,
+                     left: 0,
+                     width: "100%",
+                     height: `${virtualRow.size}px`,
+                     transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                  pageLayout={pageLayout}
+                  pageGapSize={pageGapSize}
+                  width={rowWidth}
+                  pageScale={currentPageScale.scalePercentage / 100}
+                  basePDFPageSize={basePDFPageSize}
+               />
+            ))}
+         </div>
       </div>
    );
 }
