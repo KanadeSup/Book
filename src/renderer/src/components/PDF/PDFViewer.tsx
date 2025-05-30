@@ -135,7 +135,6 @@ export function PDFViewer() {
       setCurrentPage(calculateCurrentPage());
    }, 100);
 
-   // If required values are missing, return an empty div to indicate loading state
    const rowVirtualizer = useVirtualizer({
       count: numRows,
       getScrollElement: () => scrollElement ?? null,
@@ -143,13 +142,17 @@ export function PDFViewer() {
       overscan: 3,
    });
 
+   // When row height changes, measure the virtualizer to recalculate the height
    useEffect(() => {
       rowVirtualizer.measure();
    }, [rowHeight]);
+
+   // Save virtualizer instance to store for global use
    useEffect(() => {
       setVirtualizerInstance(rowVirtualizer);
    }, [rowVirtualizer]);
 
+   // If required values are missing, return an empty div to indicate loading state
    if (!basePDFPageSize || !numPages) {
       return <div></div>;
    }
