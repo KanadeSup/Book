@@ -33,8 +33,10 @@ export function PDFViewer() {
       })),
    );
    const exceptElement = useRef<HTMLDivElement>(null);
-   const { selectedText, mousePosition } =
-      useSelectPDFText(scrollElement, exceptElement);
+   const { selectedText, mousePosition } = useSelectPDFText(
+      scrollElement,
+      exceptElement,
+   );
    const {
       setVirtualizerInstance,
       setScrollElement,
@@ -171,10 +173,7 @@ export function PDFViewer() {
          onScroll={handleScroll}
          style={
             {
-               "--scale-factor":
-                  pageLayout === "single-page"
-                     ? currentPageScale.scalePercentage / 100
-                     : currentPageScale.scalePercentage / 100 / 2,
+               "--scale-factor": currentPageScale.scalePercentage / 100,
             } as React.CSSProperties
          }
       >
@@ -241,8 +240,8 @@ const PDFPageRow = memo(
          minWidth: "100%",
       };
       const defaultPDFPageSize = {
-         height: (basePDFPageSize.height * pageScale),
-         width: (basePDFPageSize.width * pageScale),
+         height: basePDFPageSize.height * pageScale,
+         width: basePDFPageSize.width * pageScale,
       };
 
       const layoutComponents = {
