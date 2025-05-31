@@ -77,7 +77,15 @@ export function PDFPage(props: PDFPageProps) {
          <div className="canvasWrapper">
             <canvas ref={canvasRef}></canvas>
          </div>
-         <div ref={textLayerRef} className="textLayer"></div>
+         <div
+            ref={textLayerRef}
+            className="textLayer"
+            style={{
+               userSelect: "text",
+               WebkitUserSelect: "text",
+               MozUserSelect: "text",
+            }}
+         ></div>
       </div>
    );
 }

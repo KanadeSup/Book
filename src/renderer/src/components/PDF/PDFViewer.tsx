@@ -8,6 +8,7 @@ import { memo, useEffect, useMemo, useRef } from "react";
 import { useConfigStore } from "@/stores/configStore";
 import { useSelectPDFText } from "@/hooks/useSelectPDFText";
 import { useVirtualizer } from "@tanstack/react-virtual";
+import { PDFSelectTextFloatMenu } from "./PDFSelectTextFloatMenu";
 
 // Constants
 const ZOOM_THRESHOLD = 150;
@@ -31,7 +32,9 @@ export function PDFViewer() {
          scrollElement: state.scrollElement,
       })),
    );
-   // const { selectedText, setSelectedText } = useSelectPDFText(wrapperRef);
+   const exceptElement = useRef<HTMLDivElement>(null);
+   const { selectedText, mousePosition } =
+      useSelectPDFText(scrollElement, exceptElement);
    const {
       setVirtualizerInstance,
       setScrollElement,
@@ -107,7 +110,7 @@ export function PDFViewer() {
       // validate required value
       if (!basePDFPageSize || !currentPageScale.scalePercentage) return;
 
-      const scrollOffset = event.currentTarget.scrollTop;
+      const scrollOffset = (event.target as HTMLDivElement).scrollTop;
       const { height: basePDFHeight } = basePDFPageSize;
       const currentPageScaleValue = currentPageScale.scalePercentage / 100;
 
@@ -201,6 +204,13 @@ export function PDFViewer() {
                   basePDFPageSize={basePDFPageSize}
                />
             ))}
+         </div>
+         <div ref={exceptElement}>
+            <PDFSelectTextFloatMenu
+               selectedText={selectedText}
+               mousePosition={mousePosition}
+               isOpen={!!selectedText}
+            />
          </div>
       </div>
    );
