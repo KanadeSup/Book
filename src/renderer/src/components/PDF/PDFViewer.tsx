@@ -241,8 +241,8 @@ const PDFPageRow = memo(
          minWidth: "100%",
       };
       const defaultPDFPageSize = {
-         height: (basePDFPageSize.height * pageScale) / 100,
-         width: (basePDFPageSize.width * pageScale) / 100,
+         height: (basePDFPageSize.height * pageScale),
+         width: (basePDFPageSize.width * pageScale),
       };
 
       const layoutComponents = {
