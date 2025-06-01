@@ -9,6 +9,7 @@ import { useConfigStore } from "@/stores/configStore";
 import { useSelectPDFText } from "@/hooks/useSelectPDFText";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { PDFSelectTextFloatMenu } from "./PDFSelectTextFloatMenu";
+import { useResizeObserver } from "@/hooks/useResizeObserver";
 
 // Constants
 const ZOOM_THRESHOLD = 150;
@@ -42,7 +43,14 @@ export function PDFViewer() {
       setScrollElement,
       setCurrentPage,
       changeCurrentScale,
+      refreshCurrentScale,
    } = usePDFStoreActions();
+   const { width, height } = useResizeObserver(scrollElement);
+
+   useEffect(() => {
+      if (!width || !height) return;
+      refreshCurrentScale();
+   }, [width, height]);
 
    // calculate number of rows
    const numRows = useMemo(() => {

@@ -21,8 +21,8 @@ export default function PDFProvider(props: PDFProviderProps) {
          },
          currentPageLayout: "single-page",
          currentPageTransition: "continuous-page",
-         viewContainer: undefined,
-         pageScrollContainer: undefined,
+         virtualizerInstance: undefined,
+         scrollElement: undefined,
       }),
    );
    return (
