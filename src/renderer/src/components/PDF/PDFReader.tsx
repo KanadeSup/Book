@@ -7,6 +7,7 @@ import { PDFViewer } from "./PDFViewer";
 import { PDFToolbar } from "./PDFToolbar";
 import { PDFOutlineSidebar } from "./PDFOutlineSidebar";
 import { useShallow } from "zustand/react/shallow";
+import { SideChat } from "../Chat/SideChat";
 export type PDFReaderProps = {
    documentPath: string;
 };
@@ -21,9 +22,10 @@ export default function PDFReader(props: PDFReaderProps) {
 }
 
 function Main() {
-   const { isSidebarOpen } = usePDFReaderStore(
+   const { isSidebarOpen, isSideChatOpen } = usePDFReaderStore(
       useShallow((state) => ({
          isSidebarOpen: state.isSidebarOpen,
+         isSideChatOpen: state.isSideChatOpen,
       })),
    );
    return (
@@ -43,6 +45,16 @@ function Main() {
                <PDFToolbar />
             </div>
             <PDFViewer />
+         </div>
+         <div
+            style={{
+               width: isSideChatOpen ? "500px" : "0px",
+            }}
+            className="transition-all duration-300 overflow-hidden border-l border-accent shrink-0"
+         >
+            <div className="w-[500px] h-full">
+               <SideChat />
+            </div>
          </div>
       </div>
    );

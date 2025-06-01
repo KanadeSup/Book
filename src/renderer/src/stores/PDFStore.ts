@@ -49,9 +49,11 @@ export type PDFStore = {
 export type PDFReaderStore = {
    isSidebarOpen: boolean;
    isToolbarAlwaysVisible: boolean;
+   isSideChatOpen: boolean;
    actions: {
       toggleSidebarVisibility: () => void;
       setIsToolbarAlwaysVisible: (isToolbarAlwaysVisible: boolean) => void;
+      toggleSideChatVisibility: () => void;
    };
 };
 
@@ -195,6 +197,8 @@ export const createPDFReaderStore = (
             set((state) => ({ isSidebarOpen: !state.isSidebarOpen })),
          setIsToolbarAlwaysVisible: (isToolbarAlwaysVisible: boolean) =>
             set({ isToolbarAlwaysVisible }),
+         toggleSideChatVisibility: () =>
+            set((state) => ({ isSideChatOpen: !state.isSideChatOpen })),
       },
    }));
 };

@@ -1,4 +1,5 @@
 import {
+   BotMessageSquare,
    Columns2,
    Eye,
    FileStack,
@@ -18,14 +19,19 @@ import { Popover, PopoverContent, PopoverTrigger } from "../shadcn/popover";
 import { cn } from "@/utils/tailwindUtils";
 import { useRef, useState, useEffect } from "react";
 import { usePDFStore, usePDFStoreActions } from "./PDFProvider";
-import { PDFPageLayout, PDFPageScaleType, PDFPageTransition } from "@/types/pdf.types";
+import {
+   PDFPageLayout,
+   PDFPageScaleType,
+   PDFPageTransition,
+} from "@/types/pdf.types";
 import { usePDFReaderStoreActions } from "./PDFReaderProvider";
 export type PdfToolbarProps = {
    className?: string;
 };
 export function PDFToolbar(props: PdfToolbarProps) {
    const { scrollToPage } = usePDFStoreActions();
-   const { toggleSidebarVisibility } = usePDFReaderStoreActions();
+   const { toggleSidebarVisibility, toggleSideChatVisibility } =
+      usePDFReaderStoreActions();
    const handlePageNumberChange = (pageNumber: number) => {
       scrollToPage(pageNumber);
    };
@@ -55,7 +61,14 @@ export function PDFToolbar(props: PdfToolbarProps) {
          </div>
 
          {/* Right section */}
-         <div className="flex items-center gap-2 justify-self-end"></div>
+         <div className="flex items-center gap-2 justify-self-end">
+            <IconButton
+               className="w-8 h-8 hover:bg-accent"
+               onClick={() => toggleSideChatVisibility()}
+            >
+               <BotMessageSquare className="w-4 h-4" />
+            </IconButton>
+         </div>
       </div>
    );
 }
@@ -141,9 +154,7 @@ const SizeSelector = () => {
                   <p>{currentScale.scalePercentage}%</p>
                )}
                {currentScale.scaleType === "fit-width" && <p>Fit to width</p>}
-               {currentScale.scaleType === "fit-height" && (
-                  <p>Fit to height</p>
-               )}
+               {currentScale.scaleType === "fit-height" && <p>Fit to height</p>}
             </SelectTrigger>
             <SelectContent align="center" className="w-[150px]">
                {items.map((item) => (
