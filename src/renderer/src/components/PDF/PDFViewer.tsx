@@ -46,11 +46,24 @@ export function PDFViewer() {
       refreshCurrentScale,
    } = usePDFStoreActions();
    const { width, height } = useResizeObserver(scrollElement);
+   const isLoaded = basePDFPageSize && numPages;
 
+   // Change page scale when the container size changes
+   // This is to ensure the page scale is always correct
+   // when using fit-width and fit-height page layout
    useEffect(() => {
+      if (!isLoaded) return;
       if (!width || !height) return;
       refreshCurrentScale();
    }, [width, height]);
+
+   useEffect(
+      function onLoaded() {
+         if (!isLoaded) return;
+         changeCurrentScale("fit-height");
+      },
+      [isLoaded],
+   );
 
    // calculate number of rows
    const numRows = useMemo(() => {
@@ -166,7 +179,7 @@ export function PDFViewer() {
    }, [rowVirtualizer]);
 
    // If required values are missing, return an empty div to indicate loading state
-   if (!basePDFPageSize || !numPages) {
+   if (!isLoaded) {
       return <div></div>;
    }
 
