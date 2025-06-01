@@ -1,4 +1,4 @@
-export type PdfOutline = {
+export type PDFOutline = {
    title: string;
    bold: boolean;
    italic: boolean;
@@ -8,7 +8,7 @@ export type PdfOutline = {
    unsafeUrl: string | undefined;
    newWindow: boolean | undefined;
    count: number | undefined;
-   items: PdfOutline[];
+   items: PDFOutline[];
    resolvedPageNumber?: number;
    resolvedEndPageNumber?: number;
 };

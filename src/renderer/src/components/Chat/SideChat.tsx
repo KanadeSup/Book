@@ -1,17 +1,19 @@
 import { FolderClock, Plus, Send } from "lucide-react";
 import { IconButton } from "../MyButton/IconButton";
 import { MyInput } from "../MyInput/MyInput";
+import { useEffect, useState } from "react";
+import { usePDFStore } from "../PDF/PDFProvider";
+import { usePDFStoreActions } from "../PDF/PDFProvider";
+import { useShallow } from "zustand/react/shallow";
+import _ from "lodash";
+import { PDFOutline } from "@/types/pdf.types";
 
 export function SideChat() {
    return (
       <div className="flex flex-col w-full h-full bg-sidebar">
          <ChatHeader />
          <div className="flex flex-col gap-2 p-2">
-            <StarterPromptCard
-               title="Summarize the document"
-               description="Summarize the document"
-               onClick={() => {}}
-            />
+            <StarterPromptSection />
          </div>
          <MessageInput />
       </div>
@@ -46,6 +48,43 @@ function MessageInput() {
                <Send className="w-4 h-4" />
             </IconButton>
          </div>
+      </div>
+   );
+}
+
+function StarterPromptSection() {
+   const { getCurrentOutlines } = usePDFStoreActions();
+   const { currentPage } = usePDFStore(
+      useShallow((state) => ({
+         currentPage: state.currentPage,
+      })),
+   );
+   const [currentPageOutlines, setCurrentPageOutlines] = useState<PDFOutline[]>(
+      [],
+   );
+
+   const [throttledLoadOutlines] = useState(() => {
+      return _.throttle(
+         () => {
+            const outlines = getCurrentOutlines();
+            setCurrentPageOutlines(outlines);
+         },
+         1000,
+         { trailing: true, leading: false },
+      );
+   });
+
+   useEffect(throttledLoadOutlines, [currentPage]);
+   return (
+      <div className="flex flex-col gap-2 p-2 flex-wrap">
+         {currentPageOutlines.map((outline) => (
+            <StarterPromptCard
+               key={outline.title}
+               title={`Summary [${outline.title}]`}
+               description={`Summarize ${outline.title}`}
+               onClick={() => {}}
+            />
+         ))}
       </div>
    );
 }

@@ -5,6 +5,7 @@ import {
    PDFPageLayout,
    PDFPageTransition,
    PDFPageScaleType,
+   PDFOutline,
 } from "@/types/pdf.types";
 import { create } from "zustand";
 import { useConfigStore } from "./configStore";
@@ -12,6 +13,7 @@ import { Virtualizer } from "@tanstack/react-virtual";
 
 export type PDFStore = {
    documentProxy: PDFDocumentProxy | undefined;
+   outlines: PDFOutline[] | undefined;
    numPages: number;
    currentPage: number;
    basePDFPageSize: PDFPageDimension | undefined;
@@ -23,6 +25,7 @@ export type PDFStore = {
 
    actions: {
       setDocumentProxy: (documentProxy: PDFDocumentProxy) => void;
+      setOutlines: (outlines: PDFOutline[]) => void;
       setNumPages: (numPages: number) => void;
       setCurrentPage: (currentPage: number) => void;
       setBasePDFPageSize: (basePDFPageSize: PDFPageDimension) => void;
@@ -43,6 +46,7 @@ export type PDFStore = {
       setScrollElement: (scrollElement: HTMLDivElement) => void;
       scrollToPage: (pageNumber: number) => void;
       updateState: (state: Partial<PDFStore>) => void;
+      getCurrentOutlines: () => PDFOutline[];
    };
 };
 
@@ -63,6 +67,7 @@ export const createPDFStore = (initialState: Omit<PDFStore, "actions">) => {
       actions: {
          setDocumentProxy: (documentProxy: PDFDocumentProxy) =>
             set({ documentProxy }),
+         setOutlines: (outlines: PDFOutline[]) => set({ outlines }),
          setNumPages: (numPages: number) => set({ numPages }),
          setCurrentPage: (currentPage: number) => set({ currentPage }),
          setBasePDFPageSize: (basePDFPageSize: PDFPageDimension) =>
@@ -183,9 +188,34 @@ export const createPDFStore = (initialState: Omit<PDFStore, "actions">) => {
             virtualizerInstance.scrollToIndex(pageNumber - 1);
          },
          updateState: (state: Partial<PDFStore>) => set(state),
+         getCurrentOutlines: () => {
+            const outlines = get().outlines;
+            if (!outlines) return [];
+            const currentPage = get().currentPage;
+            return getOutlinesByPageNumber(outlines, currentPage);
+         },
       },
    }));
 };
+
+function getOutlinesByPageNumber(outlines: PDFOutline[], pageNumber: number) {
+   const outlinesByPageNumber: PDFOutline[] = [];
+   for (const outline of outlines) {
+      if (!outline.resolvedPageNumber || !outline.resolvedEndPageNumber)
+         continue;
+      if (
+         pageNumber >= outline.resolvedPageNumber &&
+         pageNumber <= outline.resolvedEndPageNumber
+      ) {
+         outlinesByPageNumber.push(outline);
+      }
+      if (outline.items.length > 0) {
+         const items = getOutlinesByPageNumber(outline.items, pageNumber);
+         outlinesByPageNumber.push(...items);
+      }
+   }
+   return outlinesByPageNumber;
+}
 
 export const createPDFReaderStore = (
    initialState: Omit<PDFReaderStore, "actions">,

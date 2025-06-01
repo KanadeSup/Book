@@ -12,6 +12,7 @@ export default function PDFProvider(props: PDFProviderProps) {
    const [PDFStore] = useState(() =>
       createPDFStore({
          documentProxy: undefined,
+         outlines: undefined,
          numPages: 0,
          currentPage: 0,
          basePDFPageSize: undefined,

@@ -1,7 +1,7 @@
 import { usePDFStore, usePDFStoreActions } from "./PDFProvider";
-import { PdfOutline } from "@/types/pdf.types";
+import { PDFOutline } from "@/types/pdf.types";
 import { ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { Expander } from "../Expander/Expander";
 import { ExpanderContent } from "../Expander/Expander";
@@ -10,29 +10,15 @@ import { ScrollArea } from "../shadcn/scroll-area";
 import { PDFDocumentProxy } from "pdfjs-dist";
 
 export function PDFOutlineSidebar() {
-   const { documentProxy, pageLayout, currentPage } = usePDFStore(
+   const { documentProxy, pageLayout, currentPage, outlines } = usePDFStore(
       useShallow((state) => ({
          documentProxy: state.documentProxy,
          pageLayout: state.currentPageLayout,
          currentPage: state.currentPage,
+         outlines: state.outlines,
       })),
    );
    const { scrollToPage } = usePDFStoreActions();
-   const [outlines, setOutlines] = useState<PdfOutline[]>([]);
-   useEffect(() => {
-      if (!documentProxy) return;
-      const loadOutline = async () => {
-         const documentOutlines = await documentProxy.getOutline();
-         await resolvePageNumberOutlines(documentOutlines, documentProxy);
-         await resolveEndPageNumberOutlines(
-            documentOutlines,
-            documentProxy,
-            documentProxy.numPages,
-         );
-         setOutlines(documentOutlines);
-      };
-      loadOutline();
-   }, [documentProxy]);
    const handleOutlineClick = (pageIndex: number) => {
       const navigatePage = pageIndex + 1;
       if (pageLayout === "single-page") {
@@ -49,6 +35,7 @@ export function PDFOutlineSidebar() {
          return;
       }
    };
+   if (!outlines) return <div></div>;
    return (
       <div className="h-full w-full bg-sidebar flex flex-col">
          <div className="flex items-center h-[41px] justify-center border-b border-accent shrink-0">
@@ -72,7 +59,7 @@ export function PDFOutlineSidebar() {
 }
 
 type OutlineItemProps = {
-   outline: PdfOutline;
+   outline: PDFOutline;
    level?: number;
    documentProxy?: PDFDocumentProxy;
    onClick?: (pageIndex: number) => void;
@@ -151,79 +138,4 @@ const OutlineItem = (props: OutlineItemProps) => {
          )}
       </div>
    );
-};
-
-const covertOutlineDestinationToPageIndex = async (
-   destination: string | Array<any>,
-   documentProxy: PDFDocumentProxy,
-): Promise<number | null> => {
-   try {
-      if (typeof destination === "string") {
-         const destRefArray = await documentProxy.getDestination(destination);
-         if (!destRefArray || destRefArray.length === 0) return null;
-         const pageIndex = await documentProxy.getPageIndex(destRefArray[0]);
-         return pageIndex;
-      }
-      if (Array.isArray(destination) && destination.length > 0) {
-         const pageIndex = await documentProxy.getPageIndex(destination[0]);
-         return pageIndex;
-      }
-      return null;
-   } catch (error) {
-      console.error(
-         `Error converting outline destination to page index: ${error}`,
-      );
-      return null;
-   }
-};
-
-// Resolve the destination of outlines to get the page number of the outline
-const resolvePageNumberOutlines = async (
-   outlines: PdfOutline[],
-   documentProxy: PDFDocumentProxy,
-) => {
-   for (const outline of outlines) {
-      if (outline.items.length > 0) {
-         await resolvePageNumberOutlines(outline.items, documentProxy);
-      }
-      if (!outline.dest) continue;
-      const pageIndex = await covertOutlineDestinationToPageIndex(
-         outline.dest,
-         documentProxy,
-      );
-      if (pageIndex === null) continue;
-      outline.resolvedPageNumber = pageIndex + 1;
-   }
-};
-
-const resolveEndPageNumberOutlines = async (
-   outlines: PdfOutline[],
-   documentProxy: PDFDocumentProxy,
-   maxPageNumber: number | null,
-) => {
-   const lastOutline = outlines[outlines.length - 1];
-   if (maxPageNumber) {
-      lastOutline.resolvedEndPageNumber =
-         lastOutline.resolvedPageNumber === maxPageNumber
-            ? maxPageNumber
-            : maxPageNumber - 1;
-   }
-   for (let i = 0; i < outlines.length - 1; i++) {
-      const outline = outlines[i];
-      if (!outline.dest) continue;
-      const nextOutline = outlines[i + 1];
-      if (outline.items.length > 0) {
-         await resolveEndPageNumberOutlines(
-            outline.items,
-            documentProxy,
-            nextOutline.resolvedPageNumber ?? null,
-         );
-      }
-      if (!nextOutline.resolvedPageNumber) continue;
-      if (nextOutline.resolvedPageNumber === outline.resolvedPageNumber) {
-         outline.resolvedEndPageNumber = nextOutline.resolvedPageNumber;
-      } else {
-         outline.resolvedEndPageNumber = nextOutline.resolvedPageNumber - 1;
-      }
-   }
 };
