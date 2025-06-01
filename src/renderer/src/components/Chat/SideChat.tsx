@@ -1,4 +1,4 @@
-import { FolderClock, Plus } from "lucide-react";
+import { FolderClock, Plus, Send } from "lucide-react";
 import { IconButton } from "../MyButton/IconButton";
 import { MyInput } from "../MyInput/MyInput";
 
@@ -7,18 +7,13 @@ export function SideChat() {
       <div className="flex flex-col w-full h-full bg-sidebar">
          <ChatHeader />
          <div className="flex flex-col gap-2 p-2">
-            <PrebuildPromptCard
+            <StarterPromptCard
                title="Summarize the document"
                description="Summarize the document"
                onClick={() => {}}
             />
          </div>
-         <div className="mt-auto p-2">
-            <MyInput
-               placeholder="Enter a message"
-               className="w-full p-2 rounded-md"
-            />
-         </div>
+         <MessageInput />
       </div>
    );
 }
@@ -39,12 +34,28 @@ function ChatHeader() {
    );
 }
 
-type PrebuildPromptCardProps = {
+function MessageInput() {
+   return (
+      <div className="flex flex-col gap-2 mt-auto p-2">
+         <div className="flex items-center gap-1">
+            <MyInput
+               placeholder="Enter a message"
+               className="w-full p-2 rounded-md"
+            />
+            <IconButton className="w-9 h-9">
+               <Send className="w-4 h-4" />
+            </IconButton>
+         </div>
+      </div>
+   );
+}
+
+type StarterPromptCardProps = {
    title: string;
    description: string;
    onClick: () => void;
 };
-function PrebuildPromptCard(props: PrebuildPromptCardProps) {
+function StarterPromptCard(props: StarterPromptCardProps) {
    return (
       <div className="flex items-center justify-between border border-zinc-700 rounded-md p-2 cursor-pointer hover:border-green-600 transition-all">
          <div>
