@@ -164,7 +164,7 @@ export function PDFViewer() {
 
    return (
       <div
-         className="pdfViewer w-full h-screen overflow-auto"
+         className="pdfViewer w-full h-screen overflow-auto dark-lean-scrollbar"
          onWheel={handleWheel}
          ref={(element) => {
             if (!element) return;
