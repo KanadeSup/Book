@@ -13,37 +13,37 @@ export function useSelectPDFText(
 
    const handleMouseUp = useCallback(
       (event: MouseEvent) => {
-         if (!element) return;
+         setTimeout(() => {
+            if (!element) return;
 
-         const selection = window.getSelection();
-         const range = selection?.getRangeAt(0);
-         if (
-            exceptElement &&
-            range &&
-            exceptElement.current &&
-            exceptElement.current.contains(range?.commonAncestorContainer)
-         ) {
-            return;
-         }
-         // check if the mouse is in the except element
-         if (
-            exceptElement &&
-            exceptElement.current &&
-            exceptElement.current.contains(event.target as Node)
-         ) {
-            return;
-         }
+            const selection = window.getSelection();
+            // Early return if selection or click is within the except element
+            if (exceptElement?.current) {
+               if (
+                  selection &&
+                  selection.rangeCount &&
+                  exceptElement.current.contains(
+                     selection.getRangeAt(0).commonAncestorContainer,
+                  )
+               ) {
+                  return;
+               }
+               if (exceptElement.current.contains(event.target as Node)) {
+                  return;
+               }
+            }
+            if (!selection?.rangeCount || selection.isCollapsed) {
+               return clearSelection();
+            }
+            const range = selection.getRangeAt(0);
 
-         if (!selection?.rangeCount || selection.isCollapsed || !range) {
-            return clearSelection();
-         }
+            if (!element.contains(range.commonAncestorContainer)) {
+               return clearSelection();
+            }
 
-         if (!element.contains(range.commonAncestorContainer)) {
-            return clearSelection();
-         }
-
-         setSelectedText(range.toString());
-         setMousePosition({ x: event.clientX, y: event.clientY });
+            setSelectedText(range.toString());
+            setMousePosition({ x: event.clientX, y: event.clientY });
+         }, 0);
       },
       [element],
    );
