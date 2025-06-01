@@ -8,6 +8,7 @@ import { PDFToolbar } from "./PDFToolbar";
 import { PDFOutlineSidebar } from "./PDFOutlineSidebar";
 import { useShallow } from "zustand/react/shallow";
 import { SideChat } from "../Chat/SideChat";
+import { TogglePanel } from "../TogglePanel/TogglePanel";
 export type PDFReaderProps = {
    documentPath: string;
 };
@@ -30,32 +31,30 @@ function Main() {
    );
    return (
       <div className="flex w-full h-full">
-         <div
-            style={{
-               width: isSidebarOpen ? "300px" : "0px",
-            }}
-            className="transition-all duration-300 overflow-hidden border-r border-accent shrink-0"
+         <TogglePanel
+            isOpen={isSidebarOpen}
+            width="300px"
+            height="100%"
+            transitionDuration={300}
+            className="border-r border-accent shrink-0"
          >
-            <div className="w-[300px] h-full">
-               <PDFOutlineSidebar />
-            </div>
-         </div>
+            <PDFOutlineSidebar />
+         </TogglePanel>
          <div className="flex flex-col w-full h-full">
             <div className="w-full">
                <PDFToolbar />
             </div>
             <PDFViewer />
          </div>
-         <div
-            style={{
-               width: isSideChatOpen ? "500px" : "0px",
-            }}
-            className="transition-all duration-300 overflow-hidden border-l border-accent shrink-0"
+         <TogglePanel
+            isOpen={isSideChatOpen}
+            width="500px"
+            height="100%"
+            transitionDuration={300}
+            className="border-l border-accent shrink-0"
          >
-            <div className="w-[500px] h-full">
-               <SideChat />
-            </div>
-         </div>
+            <SideChat />
+         </TogglePanel>
       </div>
    );
 }
