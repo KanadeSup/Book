@@ -54,7 +54,7 @@ export function SideChat() {
    };
    return (
       <SideChatContext.Provider value={{ messages, setMessages }}>
-         <div className="flex flex-col w-full h-full bg-sidebar">
+         <div className="flex flex-col w-full h-full bg-gradient-to-r from-[#141619] to-[#191f1f]">
             <ChatHeader />
             {messages.length === 0 && (
                <div className="flex flex-col gap-2 p-2">
