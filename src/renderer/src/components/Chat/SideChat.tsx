@@ -197,10 +197,13 @@ function MessageCard({ message }: { message: Message }) {
          <div className="space-y-2">
             {isAssistant && (
                <div className="flex items-center gap-2 mt-2">
-                  <div className="w-9 h-9 rounded-md bg-zinc-700 flex items-center justify-center">
-                     <BotIcon className="w-5 h-5" />
+                  <div className="w-10 h-10 rounded-md bg-zinc-700 flex items-center justify-center">
+                     <BotIcon className="w-6 h-6" />
                   </div>
-                  <p className="font-bold text-gray-300">OpenAI</p>
+                  <div className="flex flex-col">
+                     <p className="font-bold text-gray-300">OpenAI</p>
+                     <p className="text-sm text-gray-400"> OpenAI 4o mini</p>
+                  </div>
                </div>
             )}
             <div className="prose prose-invert">
