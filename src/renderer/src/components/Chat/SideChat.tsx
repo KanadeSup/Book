@@ -1,6 +1,5 @@
-import { BotIcon, FolderClock, Plus, Send } from "lucide-react";
+import { AtSign, BotIcon, FolderClock, Plus, Send } from "lucide-react";
 import { IconButton } from "../MyButton/IconButton";
-import { MyInput } from "../MyInput/MyInput";
 import { createContext, useContext, useEffect, useState } from "react";
 import { usePDFStore } from "../PDF/PDFProvider";
 import { usePDFStoreActions } from "../PDF/PDFProvider";
@@ -10,6 +9,8 @@ import { PDFOutline } from "@/types/pdf.types";
 import { generateSummaryPrompt, generateText } from "@/services/ai";
 import Markdown from "react-markdown";
 import { ScrollArea } from "../shadcn/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../shadcn/select";
+import { MyButton } from "../MyButton/MyButton";
 
 type SideChatContextType = {
    messages: Message[];
@@ -62,7 +63,9 @@ export function SideChat() {
                </div>
             )}
             {messages.length > 0 && <MessageChatSection />}
-            <MessageInput />
+            <div className="mt-auto mb-2">
+               <MessageInput />
+            </div>
          </div>
       </SideChatContext.Provider>
    );
@@ -216,15 +219,40 @@ function MessageCard({ message }: { message: Message }) {
 
 function MessageInput() {
    return (
-      <div className="flex flex-col gap-2 mt-auto p-2">
-         <div className="flex items-center gap-1">
-            <MyInput
-               placeholder="Enter a message"
-               className="w-full p-2 rounded-md"
-            />
-            <IconButton className="w-9 h-9">
-               <Send className="w-4 h-4" />
-            </IconButton>
+      <div className="p-2">
+         <div className="bg-gradient-to-l from-[#A9A2BD] to-[#AC595F] p-[1px] rounded-md overflow-hidden">
+            <div className="flex flex-col gap-2 mt-auto p-2 bg-sidebar rounded-md">
+               <div className="flex flex-col">
+                  <textarea
+                     placeholder="Enter a message"
+                     className="w-full p-2 rounded-md border-none outline-none"
+                     style={{ resize: "none" }}
+                  />
+                  <div className="flex items-center justify-between gap-1">
+                     <div>
+                        <MyButton variant="ghost" size="sm">
+                           <AtSign />
+                           <p className="text-sm"> Context </p>
+                        </MyButton>
+                     </div>
+                     <div className="select-none flex items-center gap-1">
+                        <Select>
+                           <SelectTrigger className="cursor-pointer" size="sm">
+                              <SelectValue placeholder="Select a model" />
+                           </SelectTrigger>
+                           <SelectContent>
+                              <SelectItem className="cursor-pointer" value="apple"> OpenAI 4o mini</SelectItem>
+                              <SelectItem className="cursor-pointer" value="banana">OpenAI 4o</SelectItem>
+                              <SelectItem className="cursor-pointer" value="orange">OpenAI 3.5 turbo</SelectItem>
+                           </SelectContent>
+                        </Select>
+                        <IconButton className="w-7 h-7">
+                           <Send className="w-4 h-4" />
+                        </IconButton>
+                     </div>
+                  </div>
+               </div>
+            </div>
          </div>
       </div>
    );
