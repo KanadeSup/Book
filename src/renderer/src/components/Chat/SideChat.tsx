@@ -58,7 +58,7 @@ export function SideChat() {
          <div className="flex flex-col w-full h-full bg-gradient-to-r from-[#141619] to-[#191f1f]">
             <ChatHeader />
             {messages.length === 0 && (
-               <div className="flex flex-col gap-2 p-2">
+               <div className="flex flex-col gap-2 p-2 h-full">
                   <StarterSection onPromptClick={handleOnPromptClick} />
                </div>
             )}
@@ -97,8 +97,19 @@ type StarterSectionProps = {
 };
 function StarterSection(props: StarterSectionProps) {
    return (
-      <div className="flex flex-col gap-2 p-2">
-         <StarterPromptSection onPromptClick={props.onPromptClick} />
+      <div className="flex flex-col gap-2 p-2 h-full">
+         <div className="flex flex-col gap-2 shrink-0">
+            <StarterPromptSection onPromptClick={props.onPromptClick} />
+         </div>
+         <div className="flex flex-col gap-2 items-center h-full justify-center">
+            <BotIcon className="w-12 h-12 text-gray-400" />
+            <h1 className="text-2xl font-extrabold bg-gradient-to-l from-[#b0a7c7] to-[#c3686e] inline-block text-transparent bg-clip-text">
+               Chat with your PDF
+            </h1>
+            <p className="text-sm text-gray-400">
+               Ask questions about your PDF and get answers from the AI.
+            </p>
+         </div>
       </div>
    );
 }
