@@ -7,6 +7,9 @@ import { usePDFStoreActions } from "../PDF/PDFProvider";
 import { useShallow } from "zustand/react/shallow";
 import _ from "lodash";
 import { PDFOutline } from "@/types/pdf.types";
+import { generateSummaryPrompt, generateText } from "@/services/ai";
+import Markdown from "react-markdown";
+import { ScrollArea } from "../shadcn/scroll-area";
 
 type SideChatContextType = {
    messages: Message[];
@@ -23,25 +26,29 @@ const SideChatContext = createContext<SideChatContextType>({
 
 export function SideChat() {
    const [messages, setMessages] = useState<Message[]>([]);
-   const handleOnPromptClick = async (text: string) => {
+   const handleOnPromptClick = async (prompt: string, message: string) => {
       const loadingMessage: Message = {
          role: "assistant",
          content: "Waiting for generate...",
       };
       const userMessage: Message = {
          role: "user",
-         content: text,
+         content: message,
       };
       setMessages([...messages, userMessage, loadingMessage]);
-      const response = await new Promise((resolve) => {
-         setTimeout(() => {
-            resolve(text);
-         }, 1000);
-      });
+      const response = await generateText(prompt);
+      if (response.success) {
+         setMessages([
+            ...messages,
+            userMessage,
+            { role: "assistant", content: response.data },
+         ]);
+         return;
+      }
       setMessages([
          ...messages,
          userMessage,
-         { role: "assistant", content: "a" },
+         { role: "assistant", content: "Error" },
       ]);
       return response;
    };
@@ -54,11 +61,7 @@ export function SideChat() {
                   <StarterSection onPromptClick={handleOnPromptClick} />
                </div>
             )}
-            {messages.length > 0 && (
-               <div className="flex flex-col gap-2 p-2">
-                  <MessageChatSection />
-               </div>
-            )}
+            {messages.length > 0 && <MessageChatSection />}
             <MessageInput />
          </div>
       </SideChatContext.Provider>
@@ -87,7 +90,7 @@ function ChatHeader() {
 }
 
 type StarterSectionProps = {
-   onPromptClick: (text: string) => void;
+   onPromptClick: (prompt: string, message: string) => void;
 };
 function StarterSection(props: StarterSectionProps) {
    return (
@@ -98,10 +101,11 @@ function StarterSection(props: StarterSectionProps) {
 }
 
 type StarterPromptSectionProps = {
-   onPromptClick: (text: string) => void;
+   onPromptClick: (prompt: string, message: string) => void;
 };
 function StarterPromptSection(props: StarterPromptSectionProps) {
    const { getCurrentOutlines } = usePDFStoreActions();
+   const { getTextContentByPageNumber } = usePDFStoreActions();
    const { currentPage } = usePDFStore(
       useShallow((state) => ({
          currentPage: state.currentPage,
@@ -122,6 +126,22 @@ function StarterPromptSection(props: StarterPromptSectionProps) {
       );
    });
 
+   const handleOnPromptClick = async (outline: PDFOutline) => {
+      const chapterPage = [
+         outline.resolvedPageNumber,
+         outline.resolvedEndPageNumber,
+      ];
+      if (chapterPage[0] === undefined || chapterPage[1] === undefined) return;
+      // call loop getTextContentByPageNumber
+      let textContent = "";
+      for (let page = chapterPage[0]; page <= chapterPage[1]; page++) {
+         const text = await getTextContentByPageNumber(page);
+         textContent += text + " ";
+      }
+      const prompt = generateSummaryPrompt("", outline.title, textContent);
+      props.onPromptClick(prompt, `Summarize ${outline.title}`);
+   };
+
    useEffect(throttledLoadOutlines, [currentPage]);
    return (
       <div className="flex flex-col gap-2 p-2 flex-wrap">
@@ -131,7 +151,7 @@ function StarterPromptSection(props: StarterPromptSectionProps) {
                title={`Summary [${outline.title}]`}
                description={`Summarize ${outline.title}`}
                onClick={() => {
-                  props.onPromptClick(`Summarize ${outline.title}`);
+                  handleOnPromptClick(outline);
                }}
             />
          ))}
@@ -161,11 +181,11 @@ function StarterPromptCard(props: StarterPromptCardProps) {
 function MessageChatSection() {
    const { messages } = useContext(SideChatContext);
    return (
-      <div className="flex flex-col gap-2 p-2">
+      <ScrollArea className="flex flex-col gap-2 p-2 h-full overflow-y-auto prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg">
          {messages.map((message, index) => (
             <MessageCard key={index} message={message} />
          ))}
-      </div>
+      </ScrollArea>
    );
 }
 
@@ -176,16 +196,16 @@ function MessageCard({ message }: { message: Message }) {
       <div className="border-b border-zinc-700 pb-3">
          <div className="space-y-2">
             {isAssistant && (
-               <div className="flex items-center gap-2">
+               <div className="flex items-center gap-2 mt-2">
                   <div className="w-9 h-9 rounded-md bg-zinc-700 flex items-center justify-center">
                      <BotIcon className="w-5 h-5" />
                   </div>
                   <p className="font-bold text-gray-300">OpenAI</p>
                </div>
             )}
-            <p className={isAssistant ? "text-gray-300" : ""}>
-               {message.content}
-            </p>
+            <div className="prose prose-invert">
+               <Markdown>{message.content}</Markdown>
+            </div>
          </div>
       </div>
    );

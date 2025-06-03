@@ -37,3 +37,22 @@ createCommand("command:translateText", async (_, text: string) => {
       data: JSON.parse(reponseText.replace("```json", "").replace("```", "")),
    };
 });
+
+createCommand("command:generateText", async (_, prompt: string) => {
+   const response = await ai.models.generateContent({
+      model: "gemini-1.5-flash",
+      contents: prompt,
+   });
+   const reponseText = response.text;
+   if (!reponseText) {
+      return {
+         success: false,
+         errorMessage: "Failed to generate text",
+         data: null,
+      };
+   }
+   return {
+      success: true,
+      data: reponseText,
+   };
+});

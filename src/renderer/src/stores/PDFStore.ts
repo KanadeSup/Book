@@ -47,6 +47,7 @@ export type PDFStore = {
       scrollToPage: (pageNumber: number) => void;
       updateState: (state: Partial<PDFStore>) => void;
       getCurrentOutlines: () => PDFOutline[];
+      getTextContentByPageNumber: (pageNumber: number) => Promise<string>;
    };
 };
 
@@ -193,6 +194,20 @@ export const createPDFStore = (initialState: Omit<PDFStore, "actions">) => {
             if (!outlines) return [];
             const currentPage = get().currentPage;
             return getOutlinesByPageNumber(outlines, currentPage);
+         },
+         getTextContentByPageNumber: async (pageNumber: number) => {
+            const { documentProxy } = get();
+            if (!documentProxy) return "";
+            const page = await documentProxy.getPage(pageNumber);
+            const textContent = await page.getTextContent();
+            return textContent.items
+               .map((item) => {
+                  if ("str" in item) {
+                     return item.str;
+                  }
+                  return "";
+               })
+               .join(" ");
          },
       },
    }));
