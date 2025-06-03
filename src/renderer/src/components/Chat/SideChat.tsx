@@ -1,4 +1,4 @@
-import { FolderClock, Plus, Send } from "lucide-react";
+import { BotIcon, FolderClock, Plus, Send } from "lucide-react";
 import { IconButton } from "../MyButton/IconButton";
 import { MyInput } from "../MyInput/MyInput";
 import { createContext, useContext, useEffect, useState } from "react";
@@ -23,13 +23,35 @@ const SideChatContext = createContext<SideChatContextType>({
 
 export function SideChat() {
    const [messages, setMessages] = useState<Message[]>([]);
+   const handleOnPromptClick = async (text: string) => {
+      const loadingMessage: Message = {
+         role: "assistant",
+         content: "Waiting for generate...",
+      };
+      const userMessage: Message = {
+         role: "user",
+         content: text,
+      };
+      setMessages([...messages, userMessage, loadingMessage]);
+      const response = await new Promise((resolve) => {
+         setTimeout(() => {
+            resolve(text);
+         }, 1000);
+      });
+      setMessages([
+         ...messages,
+         userMessage,
+         { role: "assistant", content: "a" },
+      ]);
+      return response;
+   };
    return (
       <SideChatContext.Provider value={{ messages, setMessages }}>
          <div className="flex flex-col w-full h-full bg-sidebar">
             <ChatHeader />
             {messages.length === 0 && (
                <div className="flex flex-col gap-2 p-2">
-                  <StarterSection />
+                  <StarterSection onPromptClick={handleOnPromptClick} />
                </div>
             )}
             {messages.length > 0 && (
@@ -64,16 +86,21 @@ function ChatHeader() {
    );
 }
 
-function StarterSection() {
+type StarterSectionProps = {
+   onPromptClick: (text: string) => void;
+};
+function StarterSection(props: StarterSectionProps) {
    return (
       <div className="flex flex-col gap-2 p-2">
-         <StarterPromptSection />
+         <StarterPromptSection onPromptClick={props.onPromptClick} />
       </div>
    );
 }
 
-function StarterPromptSection() {
-   const { messages, setMessages } = useContext(SideChatContext);
+type StarterPromptSectionProps = {
+   onPromptClick: (text: string) => void;
+};
+function StarterPromptSection(props: StarterPromptSectionProps) {
    const { getCurrentOutlines } = usePDFStoreActions();
    const { currentPage } = usePDFStore(
       useShallow((state) => ({
@@ -104,10 +131,7 @@ function StarterPromptSection() {
                title={`Summary [${outline.title}]`}
                description={`Summarize ${outline.title}`}
                onClick={() => {
-                  setMessages([
-                     ...messages,
-                     { role: "user", content: `Summarize ${outline.title}` },
-                  ]);
+                  props.onPromptClick(`Summarize ${outline.title}`);
                }}
             />
          ))}
@@ -118,13 +142,13 @@ function StarterPromptSection() {
 type StarterPromptCardProps = {
    title: string;
    description: string;
-   onClick: () => void;
+   onClick: (text: string) => void;
 };
 function StarterPromptCard(props: StarterPromptCardProps) {
    return (
       <div
          className="flex items-center justify-between border border-zinc-700 rounded-md p-2 cursor-pointer hover:border-green-600 transition-all"
-         onClick={props.onClick}
+         onClick={() => props.onClick(props.title)}
       >
          <div>
             <h1 className="font-bold">{props.title}</h1>
@@ -145,11 +169,23 @@ function MessageChatSection() {
    );
 }
 
-function MessageCard(props: { message: Message }) {
+function MessageCard({ message }: { message: Message }) {
+   const isAssistant = message.role === "assistant";
+
    return (
-      <div className="flex items-center justify-between border border-zinc-700 rounded-md p-2 cursor-pointer hover:border-green-600 transition-all">
-         <div>
-            <h1 className="font-bold">{props.message.content}</h1>
+      <div className="border-b border-zinc-700 pb-3">
+         <div className="space-y-2">
+            {isAssistant && (
+               <div className="flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-md bg-zinc-700 flex items-center justify-center">
+                     <BotIcon className="w-5 h-5" />
+                  </div>
+                  <p className="font-bold text-gray-300">OpenAI</p>
+               </div>
+            )}
+            <p className={isAssistant ? "text-gray-300" : ""}>
+               {message.content}
+            </p>
          </div>
       </div>
    );
