@@ -8,9 +8,9 @@ import { PDFToolbar } from "./PDFToolbar";
 import { PDFOutlineSidebar } from "./PDFOutlineSidebar";
 import { useShallow } from "zustand/react/shallow";
 import { SideChat } from "../Chat/SideChat";
-import { TogglePanel } from "../TogglePanel/TogglePanel";
 import { PDFOutline } from "@/types/pdf.types";
 import { PDFDocumentProxy } from "pdfjs-dist";
+import { HorizontalResizablePanel } from "../Resizable/HorizontalResizablePanel";
 export type PDFReaderProps = {
    documentPath: string;
 };
@@ -35,30 +35,30 @@ function Main() {
    );
    return (
       <div className="flex w-full h-full">
-         <TogglePanel
-            isOpen={isSidebarOpen}
-            width="300px"
-            height="100%"
-            transitionDuration={300}
-            className="border-r border-accent shrink-0"
+         <HorizontalResizablePanel
+            isCollapsed={!isSidebarOpen}
+            initialWidth={300}
+            minWidth={200}
+            maxWidth={500}
+            handlerPosition="right"
          >
             <PDFOutlineSidebar />
-         </TogglePanel>
+         </HorizontalResizablePanel>
          <div className="flex flex-col w-full h-full">
             <div className="w-full">
                <PDFToolbar />
             </div>
             <PDFViewer />
          </div>
-         <TogglePanel
-            isOpen={isSideChatOpen}
-            width="500px"
-            height="100%"
-            transitionDuration={300}
-            className="border-l border-accent shrink-0"
+         <HorizontalResizablePanel
+            isCollapsed={!isSideChatOpen}
+            initialWidth={500}
+            minWidth={300}
+            maxWidth={1500}
+            handlerPosition="left"
          >
             <SideChat />
-         </TogglePanel>
+         </HorizontalResizablePanel>
       </div>
    );
 }
