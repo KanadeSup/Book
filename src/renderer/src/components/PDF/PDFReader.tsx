@@ -11,6 +11,7 @@ import { SideChat } from "../Chat/SideChat";
 import { PDFOutline } from "@/types/pdf.types";
 import { PDFDocumentProxy } from "pdfjs-dist";
 import { HorizontalResizablePanel } from "../Resizable/HorizontalResizablePanel";
+import { ChatProvider } from "../Provider/ChatProvider";
 export type PDFReaderProps = {
    documentPath: string;
 };
@@ -70,7 +71,11 @@ type ProviderProps = {
 function Provider(props: ProviderProps) {
    return (
       <PDFReaderProvider>
-         <PDFProvider>{props.children}</PDFProvider>
+         <PDFProvider>
+            <ChatProvider>
+               {props.children}
+            </ChatProvider>
+         </PDFProvider>
       </PDFReaderProvider>
    );
 }
