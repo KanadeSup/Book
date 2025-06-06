@@ -21,7 +21,7 @@ export function SideChat() {
                <StarterPane />
             </div>
          ) : (
-            <div className="h-full py-2">
+            <div className="h-full py-2 max-h-full overflow-y-auto dark-lean-scrollbar">
                <MessageList messages={messages} className="px-5" />
             </div>
          )}

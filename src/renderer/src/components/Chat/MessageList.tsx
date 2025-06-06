@@ -1,5 +1,4 @@
 import { Message } from "@/types/chat.types";
-import { ScrollArea } from "../shadcn/scroll-area";
 import { BotIcon } from "lucide-react";
 import Markdown from "react-markdown";
 import { cn } from "@/utils/tailwindUtils";
@@ -11,13 +10,13 @@ type MessageListProps = {
 export function MessageList(props: MessageListProps) {
    return (
       <div className="flex flex-col gap-2 h-full">
-         <ScrollArea
+         <div
             className={cn("flex flex-col gap-2 h-full", props.className)}
          >
             {props.messages.map((message) => (
                <MessageItem key={message.id} message={message} />
             ))}
-         </ScrollArea>
+         </div>
       </div>
    );
 }
