@@ -48,6 +48,7 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
 
       // Auto-resize textarea
       const textarea = e.target;
+      textarea.style.height = "auto";
       textarea.style.height = Math.min(textarea.scrollHeight, 120) + "px";
    };
 
