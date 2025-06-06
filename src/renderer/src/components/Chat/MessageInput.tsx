@@ -61,7 +61,7 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
                onChange={handleInputChange}
                onKeyUp={handleKeyPress}
                placeholder="Enter a message..."
-               className="w-full p-2 rounded-md border-none outline-none bg-transparent text-white placeholder-gray-400 resize-none min-h-[40px] max-h-[120px] h-auto"
+               className="w-full p-2 rounded-md border-none outline-none bg-transparent text-white placeholder-gray-400 resize-none dark-lean-scrollbar min-h-[40px] max-h-[120px] h-auto"
                disabled={isLoading}
             />
             <div className="flex items-center justify-between gap-1">
