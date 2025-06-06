@@ -152,7 +152,7 @@ const ResizableHandler = (props: ResizableHandlerProps) => {
          )}
          onMouseDown={props.onMouseDown}
       >
-         <div className={cn("w-[2px] h-full bg-gray-500", indicatorClass)} />
+         <div className={cn("w-[1px] h-full bg-stone-600", indicatorClass)} />
       </div>
    );
 };

@@ -38,7 +38,7 @@ export function PDFToolbar(props: PdfToolbarProps) {
    return (
       <div
          className={cn(
-            "grid grid-cols-3 items-center w-full bg-sidebar border-b border-accent px-2 py-1",
+            "grid grid-cols-3 items-center w-full bg-sidebar border-b border-gray-600 px-2 py-1",
             props.className,
          )}
       >

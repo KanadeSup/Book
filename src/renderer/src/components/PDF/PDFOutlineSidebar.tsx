@@ -38,7 +38,7 @@ export function PDFOutlineSidebar() {
    if (!outlines) return <div></div>;
    return (
       <div className="h-full w-full bg-sidebar flex flex-col">
-         <div className="flex items-center h-[41px] justify-center border-b border-accent shrink-0">
+         <div className="flex items-center h-[41px] justify-center border-b border-gray-600 shrink-0">
             <h1 className="text-gray-200 font-bold text-center tracking-wider">
                Book Outline
             </h1>

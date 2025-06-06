@@ -35,7 +35,7 @@ export function SideChat() {
 function ChatHeader() {
    const { newChat } = useChatStoreActions();
    return (
-      <div className="flex items-center justify-between border-b border-accent h-[51px] px-2 pl-4">
+      <div className="flex items-center justify-between border-b border-gray-600 h-[51px] px-2 pl-4">
          <h1 className="font-bold">Chat</h1>
          <div className="flex items-center">
             <IconButton
