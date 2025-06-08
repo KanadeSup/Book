@@ -33,6 +33,7 @@ export function PDFViewer() {
          scrollElement: state.scrollElement,
       })),
    );
+   const previousScaleRef = useRef(0);
    const exceptElement = useRef<HTMLDivElement>(null);
    const { selectedText, mousePosition } = useSelectPDFText(
       scrollElement,
@@ -64,6 +65,20 @@ export function PDFViewer() {
       },
       [isLoaded],
    );
+
+   //Persist the position of page when zoom (page scale changes)
+   useEffect(() => {
+      if (currentPageScale.scalePercentage && !previousScaleRef.current) {
+         previousScaleRef.current = currentPageScale.scalePercentage / 100;
+         return;
+      }
+      if (!isLoaded || !scrollElement) return;
+      const currentPageScaleValue = currentPageScale.scalePercentage / 100;
+      scrollElement.scrollTop =
+         (scrollElement.scrollTop * currentPageScaleValue) /
+         previousScaleRef.current;
+      previousScaleRef.current = currentPageScaleValue;
+   }, [currentPageScale.scalePercentage]);
 
    // calculate number of rows
    const numRows = useMemo(() => {

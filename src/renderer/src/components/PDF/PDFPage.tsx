@@ -14,6 +14,8 @@ export function PDFPage(props: PDFPageProps) {
    const pageRef = useRef<HTMLDivElement>(null);
    const canvasRef = useRef<HTMLCanvasElement>(null);
    const textLayerRef = useRef<HTMLDivElement>(null);
+   const canvasRenderTaskRef = useRef<RenderTask | null>(null);
+   const textLayerRenderTaskRef = useRef<TextLayer | null>(null);
    const { documentProxy } = usePDFStore(
       useShallow((state) => ({
          documentProxy: state.documentProxy,
@@ -25,8 +27,6 @@ export function PDFPage(props: PDFPageProps) {
       const pageDiv = pageRef.current;
       if (!documentProxy || !canvas || !textLayerDiv || !pageDiv) return;
 
-      let renderTask: RenderTask | null = null;
-      let textLayer: TextLayer | null = null;
       let cancelled = false;
 
       const renderPage = async function () {
@@ -45,24 +45,32 @@ export function PDFPage(props: PDFPageProps) {
             throw Error("Cannot get canvas context");
          }
          if (cancelled) return;
-         renderTask = pageProxy.render({
-            canvasContext: ctx,
-            viewport: viewport,
-         });
-         await renderTask.promise;
-         if (cancelled) return;
-         textLayer = new TextLayer({
-            textContentSource: await pageProxy.getTextContent(),
-            container: textLayerDiv,
-            viewport: viewport,
-         });
-         await textLayer.render();
+         try {
+            const renderTask = pageProxy.render({
+               canvasContext: ctx,
+               viewport: viewport,
+            });
+            canvasRenderTaskRef.current = renderTask;
+            await renderTask.promise;
+            textLayerRenderTaskRef.current = new TextLayer({
+               textContentSource: await pageProxy.getTextContent(),
+               container: textLayerDiv,
+               viewport: viewport,
+            });
+            await textLayerRenderTaskRef.current.render();
+         } catch (error) {
+            if (error instanceof Error && error.name === "RenderingCancelledException") {
+               console.log('Rendering cancelled.');
+            } else {
+               console.error("Render error", error);
+            }
+         }
       };
       renderPage();
       return () => {
          cancelled = true;
-         renderTask?.cancel();
-         textLayer?.cancel();
+         canvasRenderTaskRef.current?.cancel();
+         textLayerRenderTaskRef.current?.cancel();
       };
    }, [documentProxy, props.scale]);
    return (
