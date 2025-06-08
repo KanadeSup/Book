@@ -131,16 +131,39 @@ export function PDFViewer() {
 
    // Persist the position of page when zoom (page scale changes)
    useEffect(() => {
-      if (currentPageScale.scalePercentage && !previousScaleRef.current) {
+      const previousScale = previousScaleRef.current;
+      if (currentPageScale.scalePercentage && !previousScale) {
          previousScaleRef.current = currentPageScale.scalePercentage / 100;
          return;
       }
       if (!isLoaded || !scrollElement) return;
-      const currentPageScaleValue = currentPageScale.scalePercentage / 100;
-      scrollElement.scrollTop =
-         (scrollElement.scrollTop * currentPageScaleValue) /
-         previousScaleRef.current;
-      previousScaleRef.current = currentPageScaleValue;
+
+      const currentScale = currentPageScale.scalePercentage / 100;
+
+      // Row Height = PDF Page Height + Gap
+      const previousRowHeight =
+         basePDFPageSize.height * previousScale + pageGapSize * 2;
+
+      // Find which row we're currently viewing
+      const currentRowIndex = Math.floor(
+         scrollElement.scrollTop / previousRowHeight,
+      );
+
+      // Caculate offset from current viewing row
+      const offsetWithinPage =
+         scrollElement.scrollTop - currentRowIndex * previousRowHeight;
+
+      // Caculate current row height with new scale
+      const currentRowHeight =
+         basePDFPageSize.height * currentScale + pageGapSize * 2;
+
+      // Caculate new scroll offset
+      const newPagePosition = currentRowIndex * currentRowHeight;
+      const scaledOffsetWithinPage =
+         (offsetWithinPage * currentScale) / previousScale;
+
+      scrollElement.scrollTop = newPagePosition + scaledOffsetWithinPage;
+      previousScaleRef.current = currentScale;
    }, [currentPageScale.scalePercentage]);
 
    // Handle update current page when scroll
