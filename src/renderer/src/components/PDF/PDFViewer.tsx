@@ -129,13 +129,16 @@ export function PDFViewer() {
       }
    };
 
-   // Persist the position of page when zoom (page scale changes)
+   // Preserve scroll position when the PDF zoom level (scale) changes
    useEffect(() => {
       const previousScale = previousScaleRef.current;
+
+      // Initialize previousScale on first render where scale exists
       if (currentPageScale.scalePercentage && !previousScale) {
          previousScaleRef.current = currentPageScale.scalePercentage / 100;
          return;
       }
+
       if (!isLoaded || !scrollElement) return;
 
       const currentScale = currentPageScale.scalePercentage / 100;
