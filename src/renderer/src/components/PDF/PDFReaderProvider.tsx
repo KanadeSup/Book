@@ -13,6 +13,7 @@ export function PDFReaderProvider(props: PDFReaderProviderProps) {
       createPDFReaderStore({
          isSidebarOpen: false,
          isToolbarAlwaysVisible: false,
+         isSideChatOpen: false,
       }),
    );
    return (
