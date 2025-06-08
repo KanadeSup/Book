@@ -85,7 +85,7 @@ export function PDFViewer() {
       if (!basePDFPageSize) return 0;
 
       const currentPageScaleValue = currentPageScale.scalePercentage / 100;
-      return basePDFPageSize.height * currentPageScaleValue + pageGapSize * 2;
+      return basePDFPageSize.height * currentPageScaleValue + pageGapSize;
    }, [currentPageScale.scalePercentage, pageGapSize, basePDFPageSize]);
 
    // calculate row width
@@ -142,7 +142,7 @@ export function PDFViewer() {
 
       // Row Height = PDF Page Height + Gap
       const previousRowHeight =
-         basePDFPageSize.height * previousScale + pageGapSize * 2;
+         basePDFPageSize.height * previousScale + pageGapSize;
 
       // Find which row we're currently viewing
       const currentRowIndex = Math.floor(
@@ -155,7 +155,7 @@ export function PDFViewer() {
 
       // Caculate current row height with new scale
       const currentRowHeight =
-         basePDFPageSize.height * currentScale + pageGapSize * 2;
+         basePDFPageSize.height * currentScale + pageGapSize;
 
       // Caculate new scroll offset
       const newPagePosition = currentRowIndex * currentRowHeight;
@@ -177,7 +177,7 @@ export function PDFViewer() {
 
       const calculateCurrentPage = () => {
          const basePageHeight = basePDFHeight * currentPageScaleValue;
-         const pageHeightIncludeGap = basePageHeight + pageGapSize * 2;
+         const pageHeightIncludeGap = basePageHeight + pageGapSize;
 
          switch (pageLayout) {
             case "single-page": {
@@ -385,7 +385,7 @@ function DoublePageLayout({
          }}
          className="grid place-items-start justify-items-center"
       >
-         <div className="flex" style={{ gap: `${pageGapSize * 2}px` }}>
+         <div className="flex" style={{ gap: `${pageGapSize}px` }}>
             <PDFPage
                pageNumber={index * 2 + 1}
                scale={pageScale}
@@ -447,7 +447,7 @@ function CoverFacingPageLayout({
          style={style}
          className="grid place-items-start justify-items-center"
       >
-         <div className="flex" style={{ gap: `${pageGapSize * 2}px` }}>
+         <div className="flex" style={{ gap: `${pageGapSize}px` }}>
             <PDFPage
                pageNumber={index * 2}
                scale={pageScale}
