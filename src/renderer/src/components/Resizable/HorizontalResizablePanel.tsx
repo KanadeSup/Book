@@ -26,6 +26,7 @@ export function HorizontalResizablePanel(props: HorizontalResizablePanelProps) {
    const panelRef = useRef<HTMLDivElement>(null);
    const sheetRef = useRef<CSSStyleSheet | null>(null);
    const animationIdRef = useRef<number | null>(null);
+   const isFirstRender = useRef(true);
 
    const startResizing = () => {
       setIsResizing(true);
@@ -89,6 +90,12 @@ export function HorizontalResizablePanel(props: HorizontalResizablePanelProps) {
    useEffect(() => {
       const panel = panelRef.current;
       if (!panel) return;
+
+      if (isFirstRender.current) {
+         panel.style.width = isCollapsed ? "0px" : `${width}px`;
+         isFirstRender.current = false;
+         return;
+      }
 
       // Smoothly change the width of the panel with a transition
       const transitionStyle = "width 0.2s ease-in-out";
