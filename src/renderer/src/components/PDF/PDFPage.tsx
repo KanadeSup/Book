@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { usePDFStore } from "./PDFProvider";
 import { TextLayer } from "pdfjs-dist";
@@ -9,6 +9,7 @@ export type PDFPageProps = {
    scale?: number;
    defaultHeight?: number;
    defaultWidth?: number;
+   scaleDelay?: number;
 };
 export function PDFPage(props: PDFPageProps) {
    const pageRef = useRef<HTMLDivElement>(null);
@@ -16,11 +17,39 @@ export function PDFPage(props: PDFPageProps) {
    const textLayerRef = useRef<HTMLDivElement>(null);
    const canvasRenderTaskRef = useRef<RenderTask | null>(null);
    const textLayerRenderTaskRef = useRef<TextLayer | null>(null);
+   const [renderedScale, setRenderedScale] = useState(props.scale ?? 1);
+   const scaleTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
    const { documentProxy } = usePDFStore(
       useShallow((state) => ({
          documentProxy: state.documentProxy,
       })),
    );
+
+   useEffect(() => {
+      const currentScale = props.scale ?? 1;
+      const delay = props.scaleDelay ?? 500;
+
+      if (currentScale !== renderedScale) {
+
+         // Clear existing timeout
+         if (scaleTimeoutRef.current) {
+            clearTimeout(scaleTimeoutRef.current);
+         }
+
+         // Set new timeout for delayed rendering
+         scaleTimeoutRef.current = setTimeout(() => {
+            setRenderedScale(currentScale);
+         }, delay);
+      }
+
+      return () => {
+         if (scaleTimeoutRef.current) {
+            clearTimeout(scaleTimeoutRef.current);
+         }
+      };
+   }, [props.scale, renderedScale, props.scaleDelay]);
+
    useEffect(() => {
       const canvas = canvasRef.current;
       const textLayerDiv = textLayerRef.current;
@@ -59,8 +88,11 @@ export function PDFPage(props: PDFPageProps) {
             });
             await textLayerRenderTaskRef.current.render();
          } catch (error) {
-            if (error instanceof Error && error.name === "RenderingCancelledException") {
-               console.log('Rendering cancelled.');
+            if (
+               error instanceof Error &&
+               error.name === "RenderingCancelledException"
+            ) {
+               console.log("Rendering cancelled.");
             } else {
                console.error("Render error", error);
             }
@@ -72,7 +104,8 @@ export function PDFPage(props: PDFPageProps) {
          canvasRenderTaskRef.current?.cancel();
          textLayerRenderTaskRef.current?.cancel();
       };
-   }, [documentProxy, props.scale]);
+   }, [documentProxy, renderedScale]);
+
    return (
       <div
          ref={pageRef}
