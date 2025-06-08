@@ -13,7 +13,7 @@ import { useResizeObserver } from "@/hooks/useResizeObserver";
 
 // Constants
 const ZOOM_THRESHOLD = 150;
-const ZOOM_STEP = 10;
+const ZOOM_STEP = 20;
 
 export function PDFViewer() {
    const scrollAmountTotal = useRef(0);
