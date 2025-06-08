@@ -79,9 +79,8 @@ export const createPDFStore = (initialState: Omit<PDFStore, "actions">) => {
          ) => {
             const newScale = get().actions.caculatePDFPageScale(
                scaleType,
-               scalePercentage,
+               scalePercentage ? Math.round(scalePercentage) : scalePercentage,
             );
-
             set({ currentPageScale: newScale });
          },
          refreshCurrentScale: () => {
