@@ -359,7 +359,6 @@ function DoublePageLayout({
       <div
          style={{
             ...commonStyle,
-            padding: `${pageGapSize}px`,
          }}
          className="grid place-items-start justify-items-center"
       >
@@ -399,7 +398,6 @@ function CoverFacingPageLayout({
 }: CoverFacingPageProps) {
    const style = {
       ...commonStyle,
-      padding: `${pageGapSize}px`,
       width,
       minWidth: "100%",
    };
