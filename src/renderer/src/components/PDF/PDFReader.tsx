@@ -34,6 +34,7 @@ function Main() {
          isSideChatOpen: state.isSideChatOpen,
       })),
    );
+   console.log(isSideChatOpen,isSidebarOpen)
    return (
       <div className="flex w-full h-full">
          <HorizontalResizablePanel

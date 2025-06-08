@@ -91,7 +91,7 @@ export function HorizontalResizablePanel(props: HorizontalResizablePanelProps) {
       if (!panel) return;
 
       // Smoothly change the width of the panel with a transition
-      const transitionStyle = "width 0.3s ease-in-out";
+      const transitionStyle = "width 0.2s ease-in-out";
       panel.style.transition = transitionStyle;
       panel.style.width = isCollapsed ? "0px" : `${width}px`;
 
@@ -100,7 +100,7 @@ export function HorizontalResizablePanel(props: HorizontalResizablePanelProps) {
       const resetTransition = () => {
          panel.style.transition = "none";
       };
-      setTimeout(resetTransition, 300);
+      setTimeout(resetTransition, 200);
    }, [isCollapsed]);
 
    return (
