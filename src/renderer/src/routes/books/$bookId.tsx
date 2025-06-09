@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { createContext, useState } from "react";
+import { createContext } from "react";
 import { useConfigStore } from "@/stores/configStore";
 import { getBooks } from "@/services/book";
 import { SpacePathInvalidError } from "@/lib/errors/spacePathInvalidError";
@@ -45,36 +45,9 @@ export const BookViewerLayoutContext =
    });
 function BookViewerPage() {
    const { book } = Route.useLoaderData();
-   const [sideBarVisible, setSideBarVisible] = useState(true);
    return (
       <div className="flex h-screen w-full">
          <PDFReader documentPath={book.filePath} />
       </div>
    );
-   // return (
-   //    <BookViewerLayoutContext.Provider
-   //       value={{ sideBarVisible, setSideBarVisible }}
-   //    >
-   //       <div className="flex flex-row h-screen overflow-hidden relative">
-   //          <div
-   //             className={cn(
-   //                "transition-all overflow-hidden shrink-0 ease-linear duration-200",
-   //                sideBarVisible ? "w-[300px]" : "w-0",
-   //             )}
-   //          >
-   //             <div className="w-[300px] h-full border-r border-accent">
-   //                <PdfOutlineSidebar />
-   //             </div>
-   //          </div>
-
-   //          <div className="w-full relative">
-   //             <div className="absolute top-0 left-0 right-0 z-50">
-   //                <PdfToolbar />
-   //             </div>
-   //             <PdfViewer />
-   //          </div>
-   //       </div>
-   //       <BookChatModal open={false} onClose={() => {}} />
-   //    </BookViewerLayoutContext.Provider>
-   // );
 }
