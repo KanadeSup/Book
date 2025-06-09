@@ -51,7 +51,7 @@ export function PDFSelectTextFloatMenu({
 
    return (
       <div
-         className="absolute top-0 left-0 bg-background p-2 rounded-md"
+         className="absolute top-0 left-0 bg-background p-2 rounded-md z-10"
          style={{
             top: mousePosition.y,
             left: mousePosition.x,
