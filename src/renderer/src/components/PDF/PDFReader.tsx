@@ -144,14 +144,14 @@ function PDFOutlineResolver(props: PDFOutlineResolverProps) {
    useEffect(() => {
       if (!documentProxy) return;
       const loadOutlines = async () => {
-         const documentOutlines = await documentProxy.getOutline();
+         const documentOutlines = await documentProxy.getOutline() ?? [];
          await resolvePageNumberOutlines(documentOutlines, documentProxy);
          await resolveEndPageNumberOutlines(
             documentOutlines,
             documentProxy,
             documentProxy.numPages,
          );
-         setOutlines(documentOutlines);
+         setOutlines([]);
       };
       loadOutlines();
    }, [documentProxy]);
@@ -185,6 +185,7 @@ const resolveEndPageNumberOutlines = async (
    maxPageNumber: number | null,
 ) => {
    const lastOutline = outlines[outlines.length - 1];
+   if(!lastOutline) return;
    if (maxPageNumber) {
       lastOutline.resolvedEndPageNumber =
          lastOutline.resolvedPageNumber === maxPageNumber
